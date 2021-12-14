@@ -1,0 +1,4 @@
+<view class="content" bindtap="exitMiniProgram">
+    <view class="title">退出当前小程序到后台。</view>
+    <button type="primary" size="default"> 点击退出当前小程序到后台 </button>
+</view>

@@ -1,0 +1,7 @@
+{
+    "navigationBarTitleText": "text",
+    "renderType": "native",
+    "usingComponents": {
+      "i-button": "../common/i-button/index"
+    }
+}

@@ -1,0 +1,15 @@
+<view class="container">
+	<view class="body">
+    <view class="btn-area">
+      <view class="body-view page-section">
+        <button type="primary" bindtap="saveFile" >保存文件到本地</button>
+        <button type="primary" bindtap="removeSavedFile" >删除已保存的本地文件</button>
+      </view>
+    </view>
+    <view class="page-section-space">
+      <view class="content-area">
+        {{hintMsg}}
+      </view>
+    </view>
+  </view>
+</view>

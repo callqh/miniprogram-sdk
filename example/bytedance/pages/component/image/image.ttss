@@ -1,0 +1,28 @@
+.page-section-ctn {
+  text-align: center;
+}
+
+.image {
+  margin-top: 30rpx;
+  width: 216rpx;
+  height: 54rpx;
+  border: 1px solid #000;
+}
+
+.aspect-fit {
+  height: 108px;
+}
+
+.width-fix {
+  width: 216px;
+}
+
+.left-fix {
+  height: 108px;
+}
+
+
+.two-direction-fix {
+  height: 20px;
+  width: 50px;
+}

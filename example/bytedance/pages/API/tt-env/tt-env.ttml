@@ -1,0 +1,4 @@
+<view class="content">
+    <view class="title">tt.env内容：{{env}}</view>
+    <button type="primary" size="default" bindtap="env"> 点击获取tt.env内容 </button>
+</view>

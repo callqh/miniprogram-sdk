@@ -1,0 +1,9 @@
+.canvas {
+  width: 750rpx;
+  height: 500rpx;
+  border: 1rpx solid #333;
+  box-sizing: border-box;
+}
+image {
+  margin-top: 50rpx;
+}

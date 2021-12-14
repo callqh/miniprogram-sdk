@@ -1,0 +1,13 @@
+<view class="container">
+	<view class="body">
+    <view class="btn-area">
+      <view class="body-view page-section">
+        <button type="primary" bindtap="showShareMenu" disabled="{{isHide}}" >显示当前小程序页面的分享按钮</button>
+        <button type="primary" bindtap="hideShareMenu" disabled="{{!isHide}}">隐藏当前小程序页面的分享按钮</button>
+      </view>
+    </view>
+    <view class="page-section-title page-section-title-space">
+      分享按钮位于小程序页面右上角的“...(更多)”中。
+    </view>
+  </view>
+</view>

@@ -1,0 +1,33 @@
+<scroll-view class="container">
+  <view class="body body-space-l lynx-space">
+    <view class="lynx-section lynx-section-scroll-view">
+      <view class="lynx-section-title lynx-section-title-space">
+        <text>Vertical Scroll\n纵向滚动</text>
+      </view>
+      <view class="lynx-scroll-view-space">
+        <scroll-view scroll-y="true" scroll-with-animation="true" style="height: 300rpx;" upper-threshold="{{50}}" lower-threshold="{{50}}" bindscrolltoupper="upper" bindscrolltolower="lower" bindscroll="scroll" 
+        scroll-top="{{scrollTop}}"
+        scroll-into-view="{{toView}}">
+          <view id="demo1" class="lynx-scroll-view-item demo-text-1"><text>A</text></view>
+          <view id="demo2" class="lynx-scroll-view-item demo-text-2"><text>B</text></view>
+          <view id="demo3" class="lynx-scroll-view-item demo-text-3"><text>C</text></view>
+        </scroll-view>
+        <i-button class="tapbtn" bindbtnclick="tap" text="Scroll into（暂不支持）"></i-button>
+        <i-button class="tapbtn" bindbtnclick="tapMove" text="Move"></i-button>
+      </view>
+    </view>
+    <view class="lynx-section lynx-section-scroll-view">
+      <view class="lynx-section-title lynx-section-title-space">
+        <text>Horizontal Scroll\n横向滚动</text>
+      </view>
+      <view class="lynx-scroll-view-space">
+        <scroll-view class="scroll-view_H" scroll-x="true" bindscroll="scroll" style="width: 100%">
+          <view id="demo1" class="lynx-scroll-view-item_H demo-text-1"><text>A</text></view>
+          <view id="demo2" class="lynx-scroll-view-item_H demo-text-2"><text>B</text></view>
+          <view id="demo3" class="lynx-scroll-view-item_H demo-text-3"><text>C</text></view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+</scroll-view>
+

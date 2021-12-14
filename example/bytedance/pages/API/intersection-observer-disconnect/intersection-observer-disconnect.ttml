@@ -1,0 +1,4 @@
+<view class="container" style="height: 100vh;">
+  <view class="page-section-title-space page-section-title">由于调用了 disconnect 方法，注册的监听底下元素的函数将永不会执行</view>
+</view>
+<view id="target" style="margin: 300px auto; width: 150px; height: 150px; background: lightblue;"> </view>

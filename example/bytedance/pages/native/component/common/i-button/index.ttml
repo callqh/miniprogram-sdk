@@ -1,0 +1,6 @@
+<view
+    class="i-btn {{ type === 'primary' ? 'i-btn-primary' : ''}} {{ type === 'error' ? 'i-btn-error' : ''}} {{ block ? 'i-btn-block' : '' }} {{ disabled ? 'i-btn-disabled' : ''}}"
+    bindtap="handleTap"
+>
+    <text class="i-btn-txt {{ disabled ? 'i-btn-txt-disabled' : '' }}">{{ text }}</text>
+</view>

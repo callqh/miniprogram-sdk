@@ -1,0 +1,35 @@
+.lynx-space {
+  flex-direction: column;
+  width: 100%;
+  padding-top: 15rpx;
+  padding-left: 80px;
+  padding-right: 80px;
+}
+.lynx-section-title {
+  justify-content: center;
+  margin-bottom: 0;
+}
+.lynx-section-scroll-view {
+  flex-direction: column;
+  margin-bottom: 60rpx;
+  justify-content: center;
+}
+.lynx-scroll-view-space {
+  margin-top: 48rpx;
+  flex-direction: column;
+}
+.scroll-view_H{
+  white-space: nowrap;
+}
+.lynx-scroll-view-item{
+  height: 300rpx;
+}
+.lynx-scroll-view-item_H{
+  display: inline-block;
+  width: 100%;
+  height: 300rpx;
+}
+.tapbtn {
+  margin-top: 16rpx;
+  justify-content: center;
+}

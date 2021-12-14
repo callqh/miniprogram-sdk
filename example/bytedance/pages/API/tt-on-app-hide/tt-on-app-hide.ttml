@@ -1,0 +1,3 @@
+<view class="content">
+    <view class="title">切后台结果：{{onAppHide}}</view>
+</view>

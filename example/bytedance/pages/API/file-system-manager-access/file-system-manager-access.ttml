@@ -1,0 +1,3 @@
+<view class="btn-area">
+  <button type="primary" bindtap="checkFile" disabled="{{!tempFilePath}}"> 判断当前临时文件是否存在 </button>
+</view>

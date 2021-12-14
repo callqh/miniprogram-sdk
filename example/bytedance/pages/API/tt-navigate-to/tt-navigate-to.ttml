@@ -1,0 +1,8 @@
+<view class="container">
+  <view class="btn-area">
+    <button type="primary" bindtap="toRoute">navigate跳转页面</button>
+  </view>
+  <view class="btn-area">
+    <button type="primary" bindtap="toBack">返回上一页</button>
+  </view>
+</view>

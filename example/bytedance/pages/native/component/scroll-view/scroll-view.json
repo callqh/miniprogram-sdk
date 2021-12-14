@@ -1,0 +1,7 @@
+{
+  "renderType": "native",
+  "navigationBarTitleText": "scroll-view",
+  "usingComponents": {
+    "i-button": "../common/i-button/index"
+  }
+}

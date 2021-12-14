@@ -1,0 +1,17 @@
+.lynx-space {
+  width: 80%;
+  flex-direction: column;
+}
+.swiper-container{
+  height: 150px;
+}
+.lynx-section, .lynx-cells, .lynx-cell {
+  flex-direction: column;
+  justify-content: center;
+}
+.lynx-cell__ft {
+  justify-content: center;
+}
+text {
+  text-align: center;
+}

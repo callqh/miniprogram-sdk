@@ -1,0 +1,88 @@
+<view class="container">
+  <view class="body body-space">
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">本地图片</view>
+      <view class="page-section-ctn">
+        <image class="image" src="{{imageUrl+'tt-logo.png'}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">网络图片</view>
+      <view class="page-section-ctn">
+        <image class="image" src="{{url}}" binderror="binderror" bindload="bindload" lazy-load />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 保持比例长边显示</view>
+      <view class="page-section-ctn">
+        <image class="image aspect-fit" mode="aspectFit" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 保持比例短边显示</view>
+      <view class="page-section-ctn">
+        <image class="image aspect-fit" mode="aspectFill" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 宽度设置高度自动变</view>
+      <view class="page-section-ctn">
+        <image class="image width-fix" mode="widthFix" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 宽度设置裁切显示上部分</view>
+      <view class="page-section-ctn">
+        <image class="image width-fix" mode="top" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 宽度设置裁切显示下部分</view>
+      <view class="page-section-ctn">
+        <image class="image width-fix" mode="bottom" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 宽度设置裁切显示中间部分</view>
+      <view class="page-section-ctn">
+        <image class="image width-fix" mode="center" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 高度设置裁切显示左侧部分</view>
+      <view class="page-section-ctn">
+        <image class="image left-fix" mode="left" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 高度设置裁切显示右侧部分</view>
+      <view class="page-section-ctn">
+        <image class="image left-fix" mode="right" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 高度设置裁切显示左上部分</view>
+      <view class="page-section-ctn">
+        <image class="image two-direction-fix" mode="top left" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 高度设置裁切显示右上部分</view>
+      <view class="page-section-ctn">
+        <image class="image two-direction-fix" mode="top right" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 高度设置裁切显示左下部分</view>
+      <view class="page-section-ctn">
+        <image class="image two-direction-fix" mode="bottom left" src="{{url}}" />
+      </view>
+    </view>
+    <view class="page-section page-section-gap">
+      <view class="page-section-title">自定义缩放 -- 高度设置裁切显示右下部分</view>
+      <view class="page-section-ctn">
+        <image class="image two-direction-fix" mode="bottom right" src="{{url}}" />
+      </view>
+    </view>
+  </view>
+</view>

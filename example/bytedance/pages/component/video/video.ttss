@@ -1,0 +1,14 @@
+.btn-set-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.feat-btn {
+  width: 130px;
+  margin: 0;
+}
+
+.feat-full-btn {
+  width: 100%;
+}

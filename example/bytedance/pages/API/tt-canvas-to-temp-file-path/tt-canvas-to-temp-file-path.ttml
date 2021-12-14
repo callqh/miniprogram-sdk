@@ -1,0 +1,5 @@
+<view class="container">
+  <canvas canvas-id="canvas" class="canvas"></canvas>
+  <button type="primary" bindtap="defaultTap">生成图片</button>
+  <image src="{{src}}"></image>
+</view>

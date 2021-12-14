@@ -1,0 +1,19 @@
+page {
+    padding: 10rpx;
+}
+
+.panel {
+    background: #fff;
+    border-radius: 5rpx;
+    padding: 10rpx;
+    margin-bottom: 10rpx;
+}
+
+.form-row-content {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5rpx;
+}
+
+.form-row-label {
+    padding-bottom: 5rpx;
+}

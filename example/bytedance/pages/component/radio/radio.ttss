@@ -1,0 +1,10 @@
+.radio{
+  margin-right: 20rpx;
+}
+.ttui-cells {
+  background-color: #ffffff;
+  box-shadow: inset 0 0 0 0 #E8E8E8;
+}
+.ttui-cell:first-child::before {
+  display: none;
+}

@@ -1,0 +1,12 @@
+<view class="container">
+	<view class="body">
+    <view class="btn-area">
+      <view class="body-view page-section">
+        <button type="primary" bindtap="saveFile" >保存临时文件到本地永久目录</button>
+      </view>
+    </view>
+    <view class="page-section-title page-section-title-space">
+      
+    </view>
+  </view>
+</view>

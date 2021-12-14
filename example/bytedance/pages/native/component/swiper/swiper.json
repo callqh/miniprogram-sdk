@@ -1,0 +1,7 @@
+{
+    "renderType": "native",
+    "navigationBarTitleText": "swiper",
+    "usingComponents": {
+      "i-button": "../common/i-button/index"
+    }
+}

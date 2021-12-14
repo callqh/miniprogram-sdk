@@ -1,0 +1,17 @@
+<view class="container">
+  <view class="body body-space-l">
+    <view class="page-section page-section-scroll-view">
+      <view class="page-section-title">当第三个元素出现在显示区域内时做出改变</view>
+      <view class="scroll-view-space">
+        <scroll-view scroll-y="true" scroll-with-animation="true" style="height: 300rpx;">
+          <view class="demo demo-{{index}} {{index===2&&show?'active':''}}" tt:for="{{list}}" tt:for-item="item" tt:for-index="index" :key="{{index}}">{{item.text}}</view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+  <view class="btn-area">
+    <button type="primary" bindtap="stopObserve">停止监听</button>
+    <button type="primary" bindtap="usePage">指定页面显示区域作为参照物</button>
+    <button type="primary" bindtap="backPage">返回上一页</button>
+  </view>
+</view>

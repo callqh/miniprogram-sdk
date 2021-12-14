@@ -1,0 +1,4 @@
+<view class="content">
+    <view class="title">报错结果：{{onError}}</view>
+    <button type="primary" size="default" bindtap="onError"> 触发错误 </button>
+</view>

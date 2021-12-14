@@ -1,0 +1,7 @@
+.switch-space {
+    margin-right: 48rpx;
+}
+.ttui-cell-switch {
+   padding-top: 8px;
+   padding-bottom: 8px; 
+}

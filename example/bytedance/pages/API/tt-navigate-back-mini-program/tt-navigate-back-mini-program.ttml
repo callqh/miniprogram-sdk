@@ -1,0 +1,11 @@
+<view class="container">
+  <view class="body">
+    <view class="page-section-title page-section-title-space">
+        点击返回到上一个小程序
+    </view>
+    <view class="btn-area">
+      <button type="primary" size="default" bindtap="backMiniProgram"> tt-navigate-back-mini-program </button> 
+    </view>
+    <view class="hint-area">{{result}}</view>
+  </view>
+</view>

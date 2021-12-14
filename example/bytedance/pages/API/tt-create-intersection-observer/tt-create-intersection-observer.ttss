@@ -1,0 +1,19 @@
+scroll-view {
+  background: #fff;
+}
+.demo {
+  height: 250rpx;
+  text-align: center;
+  line-height: 250rpx;
+  transform: scale(1);
+  transition: .3s;
+}
+.demo:nth-child(2n+1) {
+  background: #eaeaea;
+}
+.demo:nth-child(2n) {
+  background: greenyellow;
+}
+.active {
+  transform: scale(.8);
+}

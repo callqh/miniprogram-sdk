@@ -1,0 +1,36 @@
+.i-btn {
+    white-space: nowrap;
+    font-size: 14px;
+    border-radius: 2px;
+    position: relative;
+    text-decoration: none;
+    height: 44px;
+    line-height: 44px;
+    background-color: #f7f7f7 !important;
+    color: #495060 !important;
+    margin: .4rem .5rem;
+    justify-content: center;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.i-btn-primary {
+    background-color: #2d8cf0 !important;
+}
+.i-btn-error {
+    color: #fff !important;
+    background-color: #ed3f14 !important
+}
+.i-btn-txt {
+    line-height: 44px;
+    color: #fff !important;
+}
+
+.i-btn-disabled {
+    background-color: #ffffff !important;
+    border: 1px solid #D8D8D8;
+}
+
+.i-btn-txt-disabled {
+    color: #bbbec4 !important;
+}

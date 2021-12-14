@@ -1,0 +1,11 @@
+<scroll-view scroll-y class="scroll">
+  <view class="container">
+    <view class="btn-area">
+      <button type="primary" bindtap="getNodeInfo" id="btn">返回节点指定信息</button>
+    </view>
+    <view class="body" tt:if="{{nodes.width}}">
+      <view class="title">width: {{nodes.width}}</view>
+      <view class="title">height: {{nodes.height}}</view>
+    </view>
+  </view>
+</scroll-view>

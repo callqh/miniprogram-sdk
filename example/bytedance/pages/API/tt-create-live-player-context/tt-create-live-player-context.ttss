@@ -1,0 +1,8 @@
+.live-play {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.my-live {
+  margin: 0 auto;
+}

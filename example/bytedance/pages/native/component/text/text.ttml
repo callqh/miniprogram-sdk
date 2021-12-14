@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="body body-space">
+    <view class="page-section page-section-spacing">
+      <view class="text-box">
+        <text>{{text}}</text>
+      </view>
+      <i-button disabled="{{!canAdd}}" bindbtnclick="add" text="添加一行文字"></i-button>
+      <i-button disabled="{{!canRemove}}" bindbtnclick="remove" text="删除一行文字"></i-button>
+    </view>
+  </view>
+</view>
+
+

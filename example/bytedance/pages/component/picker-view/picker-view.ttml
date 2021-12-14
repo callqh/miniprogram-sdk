@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="body body-space">
+    <view class="page-section">
+      <view>
+        <view style="text-align: center;">{{year}}年{{month}}月{{day}}日</view>
+        <picker-view indicator-class="indicator-class" indicator-style="" mask-style="" style="height: 750rpx" value="{{value}}" bindchange="bindChange">
+          <picker-view-column style="text-align: center;">
+             <view tt:for="{{years}}" class="text-style">{{item}}年</view> 
+          </picker-view-column>
+          <picker-view-column style="text-align: center;">
+             <view tt:for="{{months}}" class="text-style">{{item}}月</view> 
+          </picker-view-column>
+          <picker-view-column style="text-align: center;">
+            <view tt:for="{{days}}" class="text-style">{{item}}日</view>
+          </picker-view-column>
+        </picker-view>
+      </view>
+    </view>
+  </view>
+</view>

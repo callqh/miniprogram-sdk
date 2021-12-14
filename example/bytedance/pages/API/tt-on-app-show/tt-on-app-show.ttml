@@ -1,0 +1,3 @@
+<view class="content">
+    <view class="title">切前台结果：{{onAppShow}}</view>
+</view>

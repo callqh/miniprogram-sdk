@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="body body-space">
+    <view class="page-section">
+      <view class="page-section-title page-section-title-space">
+        <text>flex-direction: row\n横向布局</text>
+      </view>
+      <view class="flex-wrp" style="flex-direction:row;">
+        <view class="flex-item demo-text-1" hover-class="black" hover-start-time="{{50}}" hover-stay-time="{{2000}}"><text>A</text></view>
+        <view class="flex-item demo-text-2" hover-class="black"><text>B </text></view>
+        <view class="flex-item demo-text-3" hover-class="gray"><text>C </text></view>
+      </view>
+    </view>
+    <view class="page-section">
+      <view class="page-section-title page-section-title-space">
+        <text>flex-direction: column\n纵向布局</text>
+      </view>
+      <view class="flex-wrp" style="flex-direction:column;padding:20rpx;"  hover-class="black">
+        <view class="flex-item flex-item-V demo-text-1" hover-stop-propagation="{{true}}" hover-class="black"><text>A</text></view>
+        <view class="flex-item flex-item-V demo-text-2" hover-stay-time="{{2000}}" hover-class="yellow"><text>B</text></view>
+        <view class="flex-item flex-item-V demo-text-3" hover-stop-propagation="{{false}}"><text>C</text></view>
+      </view>
+    </view>
+  </view>
+</view>

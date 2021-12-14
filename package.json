@@ -1,0 +1,41 @@
+{
+	"name": "tracker",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"scripts": {
+		"dev:wx": "cross-env PLATFORM=wx NODE_ENV=development  webpack --config build/webpack.dev.js --watch",
+		"dev:alipay": "cross-env PLATFORM=alipay NODE_ENV=development  webpack --config build/webpack.dev.js --watch",
+		"dev:bd": "cross-env PLATFORM=bd NODE_ENV=development  webpack --config build/webpack.dev.js --watch",
+		"dev:dd": "cross-env PLATFORM=dd NODE_ENV=development  webpack --config build/webpack.dev.js --watch",
+		"dev:bytedance": "cross-env PLATFORM=bytedance NODE_ENV=development  webpack --config build/webpack.dev.js --watch",
+		"dev:jd": "cross-env PLATFORM=jd NODE_ENV=development  webpack --config build/webpack.dev.js --watch",
+		"build": "sh ./build/build.sh ",
+		"build:wx": "cross-env PLATFORM=wx webpack --config build/webpack.prod.js --mode production",
+		"build:alipay": "cross-env PLATFORM=alipay webpack --config build/webpack.prod.js --mode production ",
+		"build:dd": "cross-env PLATFORM=dd webpack --config build/webpack.prod.js --mode production ",
+		"build:bytedance": "cross-env PLATFORM=bytedance webpack --config build/webpack.prod.js --mode production ",
+		"build:jd": "cross-env PLATFORM=jd webpack --config build/webpack.prod.js --mode production "
+	},
+	"author": "liuqh",
+	"license": "ISC",
+	"devDependencies": {
+		"@typescript-eslint/eslint-plugin": "^4.31.1",
+		"@typescript-eslint/parser": "^4.31.1",
+		"clean-webpack-plugin": "^4.0.0",
+		"copy-webpack-plugin": "^9.0.1",
+		"cross-env": "^7.0.3",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"ts-loader": "^9.2.5",
+		"typescript": "^4.4.3",
+		"webpack": "^5.53.0",
+		"webpack-cli": "^4.8.0"
+	},
+	"dependencies": {
+		"babel-loader": "^8.2.2",
+		"esbuild-loader": "^2.15.1",
+		"qs": "^6.10.1"
+	}
+}

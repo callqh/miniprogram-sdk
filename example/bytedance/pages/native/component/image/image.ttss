@@ -1,0 +1,44 @@
+.lynx-space {
+  flex-direction: column;
+  padding: 15rpx;
+}
+
+.lynx-section {
+  flex-direction: column;
+  margin-bottom: 60rpx;
+}
+
+text {
+  margin-bottom: 8px;
+  color: #999999;
+  font-size: 14px;
+}
+
+.lynx-section-ctn {
+  justify-content: center;
+}
+
+.image {
+  margin-top: 30rpx;
+  width: 216rpx;
+  height: 54rpx;
+  border: 1px solid #000;
+}
+
+.aspect-fit {
+  height: 108px;
+}
+
+.width-fix {
+  width: 216px;
+}
+
+.left-fix {
+  height: 108px;
+}
+
+
+.two-direction-fix {
+  height: 20px;
+  width: 50px;
+}

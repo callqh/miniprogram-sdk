@@ -1,0 +1,24 @@
+<!--index.wxml-->
+<view class="container">
+  <view class="userinfo">
+    <button open-type="share" type="primary">分享</button>
+    <block jd:if="{{canIUseOpenData}}">
+      <view class="userinfo-avatar" bindtap="bindViewTap">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+      <open-data type="userNickName"></open-data>
+    </block>
+    <block jd:elif="{{!hasUserInfo}}">
+      <button bindtap="getUserProfile" jd:if="{{canIUseGetUserProfile}}"> 获取头像昵称 </button>
+      <button open-type="getUserInfo" bindgetuserinfo="getUserInfo" jd:elif="{{canIUse}}"> 获取头像昵称 </button>
+      <view jd:else> 请使用1.4.4及以上版本基础库 </view>
+    </block>
+    <block jd:else>
+      <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+    </block>
+  </view>
+  <view class="usermotto">
+    <text class="user-motto">{{motto}}</text>
+  </view>
+</view>

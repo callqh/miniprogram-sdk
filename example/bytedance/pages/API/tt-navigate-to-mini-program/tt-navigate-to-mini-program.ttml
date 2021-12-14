@@ -1,0 +1,13 @@
+<view class="container">
+  <view class="body">
+    <view class="page-section-title page-section-title-space">
+        点击跳转到另一个小程序
+    </view>
+    <view class="btn-area">
+      <button type="primary" size="default" bindtap="toMiniProgram"> tt-navigate-to-mini-program </button> 
+    </view>
+    <view class="hint-area">{{result}}</view>
+  </view>
+</view>
+
+

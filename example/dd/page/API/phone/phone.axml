@@ -1,0 +1,41 @@
+<view>
+    <view class="panel">
+        <view class="form-row">
+            <view class="form-row-label">工号</view>
+            <view class="form-row-content">
+                <input type="input" placeholder="工号" onInput="bindWorkNo" value="{{workNo}}" />
+            </view>
+        </view>
+        <button type="primary" onTap="onCallUsers">callUsers</button>
+    </view>
+    <view class="panel">
+        <view class="form-row">
+            <view class="form-row-label">国家代号</view>
+            <view class="form-row-content">
+                <input type="input" placeholder="国家代号" onInput="bindCountryCode" value="{{countryCode}}" />
+            </view>
+        </view>
+        <view class="form-row">
+            <view class="form-row-label">电话号码</view>
+            <view class="form-row-content">
+                <input type="input" placeholder="电话号码" onInput="bindPhoneNumber" value="{{phoneNumber}}" />
+            </view>
+        </view>
+        <view class="form-row">
+            <view class="form-row-label">显示钉钉电话</view>
+            <view class="form-row-content">
+                <switch checked="{{showDingCall}}" onChange="bindShowDingCall" />
+            </view>
+        </view>
+        <button type="primary" onTap="onShowCallMenu">showCallMenu</button>
+    </view>
+    <view class="panel">  
+        <view class="form-row">
+            <view class="form-row-label">企业corpId</view>
+            <view class="form-row-content">
+            <input type="text" placeholder="输入企业corpId" value="{{corpId}}" onInput="bindCorpId" />
+            </view>
+        </view>
+        <button type="primary" onTap="onCheckBizCall">checkBizCall</button>
+    </view>
+</view>

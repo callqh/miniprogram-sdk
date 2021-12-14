@@ -1,0 +1,11 @@
+<view class="page">
+  <image src="http://p1.pstatp.com/origin/pgc-image/1531126392813c2431a6822" mode="" />
+  <view id="box">
+    <view class="titleImgage">图片信息</view>
+    <view class="titlelist" tt:for="{{infoList}}">
+      <text>{{item.chinaName}}</text>
+      <text>{{item.value}}</text>
+    </view>
+  </view>
+  <button bindtap="getInfo">获取图片信息</button>
+</view>

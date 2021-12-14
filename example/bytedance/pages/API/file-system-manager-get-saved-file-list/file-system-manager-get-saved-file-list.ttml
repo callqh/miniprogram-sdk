@@ -1,0 +1,3 @@
+<view class="btn-area">
+  <button type="primary" bindtap="getSaveFileList" disabled="{{!tempFilePath}}">获取本地缓存文件列表</button>
+</view>

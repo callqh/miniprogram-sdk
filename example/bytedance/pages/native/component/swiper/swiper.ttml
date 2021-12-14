@@ -1,0 +1,74 @@
+<view class="container">
+  <view class="body body-space lynx-space">
+    <view class="lynx-section">
+      <swiper 
+        indicator-dots="{{indicatorDots}}" 
+        indicator-color="#3370ff" 
+        indicator-active-color="#f54a45" 
+        current="{{1}}" 
+        display-multiple-items="{{1}}"  
+        autoplay="{{autoplay}}" 
+        interval="{{interval}}" 
+        circular="{{circular}}" 
+        vertical="{{vertical}}" 
+        duration="{{duration}}"
+
+        bindchange="onChange" 
+        bindanimationfinish="onAnimationFinish"
+        bindtransition="onTransition"
+        class="swiper-container" >
+        <swiper-item tt:for="{{content}}" tt:for-index="idx" style="background-color:{{background[idx]}}">
+          <text class="swiper-item-container {{item}}">
+            {{item}}
+          </text>
+        </swiper-item>
+      </swiper>
+    </view>
+    <view class="lynx-section">
+      <view class="lynx-cells">
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">指示点:{{indicatorDots}}</text>
+          <view class="lynx-cell__ft">
+            <i-button class="tapbtn" bindbtnclick="changeIndicatorDots" text="修改"></i-button>
+          </view>
+        </view>
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">自动播放:{{autoplay}}</text>
+          
+          <view class="lynx-cell__ft">
+          <i-button class="tapbtn" bindbtnclick="changeAutoplay" text="修改"></i-button>
+          </view>
+        </view>
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">循环播放:{{circular}}</text>
+          <view class="lynx-cell__ft">
+          <i-button class="tapbtn" bindbtnclick="changeCircular" text="修改"></i-button>
+          </view>
+        </view>
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">滑块放置方向是否为竖直:{{vertical}}</text>
+          <view class="lynx-cell__ft">
+          <i-button class="tapbtn" bindbtnclick="changeVertical" text="修改"></i-button>
+          </view>
+        </view>
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">自动播放间隔:{{interval}}</text>
+          <input class="input" type="text" value="{{interval}}" bindconfirm="changeInterval"/>
+        </view>
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">自动播放时长:{{duration}}</text>
+          <input class="input" type="text" value="{{duration}}" bindconfirm="changeDuration"/>
+        </view>
+        <view class="lynx-cell">
+          <text class="lynx-cell__bd">change: {{onChangeText}}</text>
+        </view>
+         <view class="lynx-cell">
+          <text class="lynx-cell__bd">anim: {{onAnimationFinishText}}</text>
+        </view>
+         <view class="lynx-cell">
+          <text class="lynx-cell__bd">transition: {{onTransitionText}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="body">
+    <view class="page-section-title page-section-title-space">
+      点击向服务器发起请求
+    </view>
+    <view tt:if="{{response}}" class="page-section-title page-section-title-space">
+      返回数据:{{response}}
+    </view>
+    <view class="title"></view>
+    <view class="btn-area">
+      <button bindtap="makeRequest" data-type="GET" type="primary" disabled="{{buttonDisabled}}">get request</button>
+      <button bindtap="makeRequest" data-type="POST" type="primary" disabled="{{buttonDisabled}}">post request</button>
+      <button bindtap="makeRequest" data-type="OPTIONS" type="primary" disabled="{{buttonDisabled}}">options request</button>
+      <button bindtap="makeRequest" data-type="PUT" type="primary" disabled="{{buttonDisabled}}">put request</button>
+      <button bindtap="makeRequest" data-type="DELETE" type="primary" disabled="{{buttonDisabled}}">delete request</button>
+      <button bindtap="makeRequest" data-type="HEAD" type="primary" disabled="{{buttonDisabled}}">head request</button>
+      <button bindtap="abortRequest" type="primary" disabled="{{buttonDisabled}}">abort</button>
+    </view>
+  </view>
+</view>

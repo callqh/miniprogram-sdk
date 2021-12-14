@@ -1,0 +1,17 @@
+<map id="myMap" style="width: 100%; height: 300px;" latitude="{{latitude}}" longitude="{{longitude}}" markers="{{markers}}" circles="{{circles}}" show-location="{{true}}" scale="{{scale}}"> </map>
+<view class="container">
+  <view class="body" tt:if="{{region}}">
+    <view class="title">西南角-经度：{{region.southwest.longitude}}</view>
+    <view class="title">西南角-维度：{{region.southwest.latitude}}</view>
+    <view class="title">东北角-经度：{{region.northeast.longitude}}</view>
+    <view class="title">东北角-维度：{{region.northeast.latitude}}</view>
+  </view>
+  <view class="btn-area">
+    <button bindtap="authLocation" type="primary" size="mini">申请定位权限</button>
+    <button bindtap="getCenterLocation" type="primary" size="mini">获取位置</button>
+    <button bindtap="moveToLocation" type="primary" size="mini">移动位置</button>
+    <button bindtap="getScale" type="primary" size="mini">缩放级别</button>
+    <button bindtap="getRegion" type="primary" size="mini">获取地图视野</button>
+  </view>
+</view>
+<view class="footer"></view>

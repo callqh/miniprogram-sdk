@@ -1,0 +1,4 @@
+<view class="content">
+    <view class="title">切前台结果：{{onAppShow}}</view>
+    <button type="primary" size="default" bindtap="offAppShow"> 取消监听小程序切前台事件 </button>
+</view>

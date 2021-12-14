@@ -1,0 +1,11 @@
+<view class="container">
+  <view class="page-body-title header-center">获取类名为title的所有节点信息的top</view>
+  <view class="body">
+    <view class="title">top: {{list[0].top}}</view>
+    <view class="title">top: {{list[1].top}}</view>
+    <view class="title">top: {{list[2].top}}</view>
+    <view class="title">top: {{list[3].top}}</view>
+    <view class="title">top: {{list[4].top}}</view>
+    <view class="title">top: {{list[5].top}}</view>
+  </view>
+</view>

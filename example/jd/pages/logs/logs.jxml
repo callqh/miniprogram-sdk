@@ -1,0 +1,6 @@
+<!--logs.wxml-->
+<view class="container log-list">
+  <block jd:for="{{logs}}" jd:key="timeStamp" jd:for-item="log">
+    <text class="log-item">{{index + 1}}. {{log.date}}</text>
+  </block>
+</view>
