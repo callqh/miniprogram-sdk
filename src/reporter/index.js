@@ -1,5 +1,5 @@
 import store from '../store';
-import { getCommonParam, getUUID, storage } from '../../utils';
+import { getCommonParam, getUUID, logger, storage } from '../../utils';
 import platform from '../platform';
 import qs from 'qs';
 
@@ -14,7 +14,7 @@ class Reporter {
 	 * 追踪埋点数据
 	 * @param {*} data 需要上报的数据
 	 */
-	track(data = {}) {
+	track(data = {}, type = '自定义埋点') {
 		const config = store.get('config');
 
 		// 获取公参
@@ -24,9 +24,13 @@ class Reporter {
 			data.appKey = config.ak;
 			data.deviceId = storage.get('uid') || getUUID();
 			// 添加用户的公参
-			data = { ...data, ...commonParam, ...config.customParams };
-
-			this.queue.push(qs.stringify(data));
+			const result = { ...data, ...commonParam, ...config.customParams };
+			logger(type, {
+				...data,
+				公参: commonParam,
+				自定义参数: config.customParams,
+			});
+			this.queue.push(qs.stringify(result));
 			if (!this.timerId) {
 				// 为了不影响正常的业务请求，这里延时发出我们的埋点信息
 				this.timerId = setTimeout(() => {

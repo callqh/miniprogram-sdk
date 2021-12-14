@@ -11,13 +11,14 @@ t.init({
 		pageShow: true,
 		pageLeave: true,
 		pageShare: true,
+		pageCollect:true,
 		pageClickEvent: true,
 	},
 	// 自定义公参
 	customParams: {
 		appName: "测试Demo"
 	},
-	debug: false,
+	debug: true,
 });
 
 App({

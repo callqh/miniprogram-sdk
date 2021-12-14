@@ -6,10 +6,11 @@ const libVersion = pkg.version;
 /**
  * 获取用户信息
  */
-export const getUserInfo = () =>
+export const getUserInfo = cb =>
 	platform.getUserInfo({
 		success(res) {
 			store.set('userInfo', res);
+			cb && cb(res);
 		},
 	});
 

@@ -1889,14 +1889,18 @@ class Reporter {
     this.timerId;
     this.resend_count = 0;
   }
-  track(data = {}) {
+  track(data = {}, type = "\u81EA\u5B9A\u4E49\u57CB\u70B9") {
     const config = _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config");
     (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getCommonParam)((commonParam) => {
       data.t = "metric";
       data.appKey = config.ak;
       data.deviceId = _utils__WEBPACK_IMPORTED_MODULE_1__.storage.get("uid") || (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getUUID)();
-      data = __spreadValues(__spreadValues(__spreadValues({}, data), commonParam), config.customParams);
-      this.queue.push(qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(data));
+      const result = __spreadValues(__spreadValues(__spreadValues({}, data), commonParam), config.customParams);
+      (0,_utils__WEBPACK_IMPORTED_MODULE_1__.logger)(type, __spreadProps(__spreadValues({}, data), {
+        \u516C\u53C2: commonParam,
+        \u81EA\u5B9A\u4E49\u53C2\u6570: config.customParams
+      }));
+      this.queue.push(qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(result));
       if (!this.timerId) {
         this.timerId = setTimeout(() => {
           this._flush();
@@ -1970,6 +1974,7 @@ const defaultConfig = {
     pageShow: true,
     pageLeave: true,
     pageShare: true,
+    pageCollect: true,
     pageClickEvent: true
   },
   customParams: {},
@@ -2044,12 +2049,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "pageHide": () => (/* binding */ pageHide),
 /* harmony export */   "pageUnLoad": () => (/* binding */ pageUnLoad),
 /* harmony export */   "pageShare": () => (/* binding */ pageShare),
+/* harmony export */   "shareTimeLine": () => (/* binding */ shareTimeLine),
+/* harmony export */   "addToFavorites": () => (/* binding */ addToFavorites),
 /* harmony export */   "pageClickEvent": () => (/* binding */ pageClickEvent)
 /* harmony export */ });
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils */ "./utils/index.js");
 /* harmony import */ var _reporter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../reporter */ "./src/reporter/index.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store */ "./src/store/index.js");
 var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __propIsEnum = Object.prototype.propertyIsEnumerable;
@@ -2065,101 +2074,154 @@ var __spreadValues = (a, b) => {
     }
   return a;
 };
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 
 
 
+let lastPageInfo = {
+  refPageURL: "",
+  refPageTitle: ""
+};
 const CLICK_EVENT_TYPE = ["tap", "longtap", "longpress"];
 const appLaunch = (oldOnLunch) => _proxyHooks(oldOnLunch, function() {
-  (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getUserInfo)();
+  const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
+  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   const data = {
     eventId: "AppStart",
+    pageTitle,
+    pageURL: "",
+    scene,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppLunch");
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("is_launched", true);
-  (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$AppLunch", data);
 });
 const appShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
+  const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
   const is_first_app_show = _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("first_app_show");
-  console.log("\u3010 store.get('commonParam') \u3011==>", _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("commonParam"));
   const is_not_launch = _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("is_launched");
   const data = __spreadValues({
     eventId: "AppShow",
+    scene,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   }, _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("commonParam"));
   if (is_first_app_show && !is_not_launch) {
-    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppShow");
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("first_app_show", false);
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$AppShow", data);
   }
 });
 const appHide = (oldOnHide) => {
   _proxyHooks(oldOnHide, function() {
-    const data = __spreadValues({
+    const data = {
       eventId: "AppHide",
       dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
-    }, _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("commonParam"));
-    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
+    };
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppHide");
     _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("first_app_show", true);
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$AppHide", data);
   });
 };
 const appError = (oldOnError) => _proxyHooks(oldOnError, function(err) {
   const data = {
     eventId: "Error",
-    er: err,
+    erType: err.type,
+    erMsg: err,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Error");
 });
 const pageShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
   const time = Date.now();
+  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", time);
-  const data = {
+  const { scene, query } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
+  const data = __spreadProps(__spreadValues({
     eventId: "Pageview",
-    pageUrl: this.route,
-    tp: time,
-    result: true,
-    unloadTime: time,
+    pageTitle,
+    pageURL: this.route,
+    launchOptionsSync: scene,
+    query
+  }, lastPageInfo), {
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+  });
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageView");
+  lastPageInfo = {
+    refPageTitle: pageTitle,
+    refPageURL: this.route
   };
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
-  (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$Pageview", data);
 });
 const pageHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
+  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   const pageStayTime = _getPageStayTime();
   const data = {
     eventId: "PageJumpOff",
     unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
-    pageUrl: this.route,
-    duration: pageStayTime,
+    pageTitle,
+    pageURL: this.route,
+    offDuration: pageStayTime,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
-  (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$PageHide", data);
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageHide");
 });
 const pageUnLoad = (oldOnUnLoad) => _proxyHooks(oldOnUnLoad, function() {
+  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   const pageStayTime = _getPageStayTime();
   const data = {
     eventId: "AppOff",
+    pageTitle,
     pageUrl: this.route,
-    duration: pageStayTime,
+    offDuration: pageStayTime,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
-  (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$PageUnload", data);
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageUnload");
 });
 const pageShare = function(oldShare) {
   return function() {
     const result = oldShare.apply(this);
+    const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
+    const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
     const data = __spreadValues({
       eventId: "Share",
-      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+      pageTitle,
+      shareTitle: pageTitle,
+      pageURL: this.route,
+      sharePath: this.route,
+      shareDepth: scene =  true ? 0 : 0,
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+      shareMethod: "\u8F6C\u53D1\u6D88\u606F\u5361\u7247"
     }, result);
-    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$Share", data);
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
+  };
+};
+const shareTimeLine = function(oldShare) {
+  return function() {
+    const result = oldShare.apply(this);
+    const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
+    const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
+    const data = __spreadValues({
+      eventId: "Share",
+      pageTitle,
+      shareTitle: pageTitle,
+      pageURL: this.route,
+      sharePath: this.route,
+      shareDepth: scene =  true ? 0 : 0,
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+      shareMethod: "\u670B\u53CB\u5708\u5206\u4EAB"
+    }, result);
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
+  };
+};
+const addToFavorites = function() {
+  return function() {
+    const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
+    const data = {
+      eventId: "Collect",
+      pageTitle,
+      pageURL: this.route,
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    };
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Collect");
   };
 };
 const pageClickEvent = (oldEvent) => _proxyHooks(oldEvent, function(e) {
@@ -2171,13 +2233,12 @@ const pageClickEvent = (oldEvent) => _proxyHooks(oldEvent, function(e) {
   if (e && CLICK_EVENT_TYPE.includes(e.type) && e.target.id === e.currentTarget.id) {
     const data = {
       eventId: "Click",
-      id: e.currentTarget.id,
+      elementId: e.currentTarget.id,
       elementLocation: xp,
       x: e.detail && e.detail.x,
       y: e.detail && e.detail.y
     };
-    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data);
-    (0,_utils__WEBPACK_IMPORTED_MODULE_0__.logger)("$ClickEvent", data);
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$ClickEvent");
   }
 });
 function _proxyHooks(fn = function() {
@@ -2299,6 +2360,7 @@ class Tracker {
     }
     if (autoTrack.pageShare) {
       options.onShareAppMessage = (0,_hooks__WEBPACK_IMPORTED_MODULE_0__.pageShare)(options.onShareAppMessage);
+      options.onShareTimeLine = (0,_hooks__WEBPACK_IMPORTED_MODULE_0__.shareTimeLine)(options.onShareTimeline);
     }
     if (autoTrack.pageClickEvent) {
       if (_store__WEBPACK_IMPORTED_MODULE_2__["default"].get("config").octopus) {
@@ -2311,13 +2373,15 @@ class Tracker {
         }
       }
     }
+    if (autoTrack.pageCollect) {
+      options.onAddToFavorites = (0,_hooks__WEBPACK_IMPORTED_MODULE_0__.addToFavorites)(options.onAddToFavorites);
+    }
     return options;
   }
   login(uid) {
     _utils__WEBPACK_IMPORTED_MODULE_3__.storage.set("uid", uid);
   }
   _trackInit() {
-    (0,_utils__WEBPACK_IMPORTED_MODULE_3__.getUserInfo)();
   }
 }
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new Tracker());
@@ -2423,9 +2487,10 @@ var __async = (__this, __arguments, generator) => {
 
 
 const libVersion = _package_json__WEBPACK_IMPORTED_MODULE_2__.version;
-const getUserInfo = () => _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].getUserInfo({
+const getUserInfo = (cb) => _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].getUserInfo({
   success(res) {
     _src_store__WEBPACK_IMPORTED_MODULE_1__["default"].set("userInfo", res);
+    cb && cb(res);
   }
 });
 const getUUID = function() {

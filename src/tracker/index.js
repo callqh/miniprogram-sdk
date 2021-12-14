@@ -8,10 +8,12 @@ import {
 	pageUnLoad,
 	pageShare,
 	pageClickEvent,
+	shareTimeLine,
+	addToFavorites,
 } from './hooks';
 import reporter from '../reporter';
 import store from '../store';
-import { getUserInfo, getUUID, storage } from '../../utils';
+import { getUUID, storage } from '../../utils';
 // page的原始声明周期集合
 const PAGE_LIFE_METHOD = [
 	'onLoad',
@@ -102,6 +104,7 @@ class Tracker {
 
 		if (autoTrack.pageShare) {
 			options.onShareAppMessage = pageShare(options.onShareAppMessage);
+			options.onShareTimeLine = shareTimeLine(options.onShareTimeline);
 		}
 
 		if (autoTrack.pageClickEvent) {
@@ -119,6 +122,9 @@ class Tracker {
 			}
 		}
 
+		if (autoTrack.pageCollect) {
+			options.onAddToFavorites = addToFavorites(options.onAddToFavorites);
+		}
 		return options;
 	}
 
@@ -133,9 +139,7 @@ class Tracker {
 	/**
 	 * 内部的init方法，主要是为了生成一些公共的信息
 	 */
-	_trackInit() {
-		getUserInfo();
-	}
+	_trackInit() {}
 }
 
 export default new Tracker();

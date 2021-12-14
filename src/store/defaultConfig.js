@@ -12,6 +12,7 @@ export const defaultConfig = {
 		pageShow: true,
 		pageLeave: true,
 		pageShare: true,
+		pageCollect: true,
 		pageClickEvent: true,
 	},
 	customParams: {},
