@@ -72,8 +72,7 @@ export function getCommonParam(callback) {
 						model: res.model,
 						system: system[0],
 						systemVersion: system[1],
-						screenHeight: res.screenHeight,
-						screenWidth: res.screenWidth,
+						screenResolution: `${res.screenWidth}*${res.screenHeight}`,
 						platformVersion: res.version,
 						platformLanguage: res.language,
 					};

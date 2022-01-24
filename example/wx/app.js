@@ -3,7 +3,7 @@ import t from './utils/tracker.wx';
 
 t.init({
 	ak: 'f128205523d8f4c5e9d186a28b171192c',
-	url: 'https://www.baidu.com',
+	url: 'https://tracking-collector-dev.app.terminus.io/collect',
 	autoTrack: {
 		appLaunch: true,
 		appShow: true,

@@ -17,7 +17,10 @@
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
     </block>
   </view>
-  <button open-type="share" type="primary">分享</button>
+  <button open-type="share" type="primary" style="margin-top: 20pt;">分享</button>
+
+  <button bindtap="sendError" type="warn" style="margin-top: 20pt;">发生错误</button>
+
   <view class="usermotto">
     <text class="user-motto">{{motto}}</text>
   </view>

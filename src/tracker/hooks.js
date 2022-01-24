@@ -60,7 +60,7 @@ export const appError = oldOnError =>
 	_proxyHooks(oldOnError, function (err) {
 		const data = {
 			eventId: 'Error',
-			erType: err.type,
+			erType: err.type || 1,
 			erMsg: err,
 			dateTime: formatTimestamp(Date.now()),
 		};
@@ -153,7 +153,7 @@ export const pageShare = function (oldShare) {
 			pageURL: this.route,
 			sharePath: this.route,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			shareDepth: (scene = 1001 ? 0 : 1),
+			shareDepth: scene === 1001 ? 0 : 1,
 			dateTime: formatTimestamp(Date.now()),
 			shareMethod: '转发消息卡片',
 			...result,
@@ -179,7 +179,7 @@ export const shareTimeLine = function (oldShare) {
 			pageURL: this.route,
 			sharePath: this.route,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			shareDepth: (scene = 1001 ? 0 : 1),
+			shareDepth: scene === 1001 ? 0 : 1,
 			dateTime: formatTimestamp(Date.now()),
 			shareMethod: '朋友圈分享',
 			...result,

@@ -42,6 +42,10 @@ Page({
     });
     
   },
+
+  sendError(){
+    console.log(error)
+  },
   onLoad() {
     if (wx.getUserProfile) {
       this.setData({

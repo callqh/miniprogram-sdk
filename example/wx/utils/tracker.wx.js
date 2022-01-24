@@ -2123,7 +2123,7 @@ const appHide = (oldOnHide) => {
 const appError = (oldOnError) => _proxyHooks(oldOnError, function(err) {
   const data = {
     eventId: "Error",
-    erType: err.type,
+    erType: err.type || 1,
     erMsg: err,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
@@ -2187,7 +2187,7 @@ const pageShare = function(oldShare) {
       shareTitle: pageTitle,
       pageURL: this.route,
       sharePath: this.route,
-      shareDepth: scene =  true ? 0 : 0,
+      shareDepth: scene === 1001 ? 0 : 1,
       dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
       shareMethod: "\u8F6C\u53D1\u6D88\u606F\u5361\u7247"
     }, result);
@@ -2205,7 +2205,7 @@ const shareTimeLine = function(oldShare) {
       shareTitle: pageTitle,
       pageURL: this.route,
       sharePath: this.route,
-      shareDepth: scene =  true ? 0 : 0,
+      shareDepth: scene === 1001 ? 0 : 1,
       dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
       shareMethod: "\u670B\u53CB\u5708\u5206\u4EAB"
     }, result);
@@ -2520,8 +2520,7 @@ function getCommonParam(callback) {
           model: res.model,
           system: system[0],
           systemVersion: system[1],
-          screenHeight: res.screenHeight,
-          screenWidth: res.screenWidth,
+          screenResolution: `${res.screenWidth}*${res.screenHeight}`,
           platformVersion: res.version,
           platformLanguage: res.language
         };
