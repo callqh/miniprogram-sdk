@@ -63,6 +63,7 @@ export function getCommonParam(callback) {
 				if (res) {
 					common_params = {
 						distinctId: getUUID(),
+						sessionId: getUUID(),
 						appPlatform: 'MP',
 						access,
 						lib: 'js',
@@ -79,7 +80,9 @@ export function getCommonParam(callback) {
 				}
 			},
 			complete() {
-				callback && callback(common_params); // 执行回调
+				getUserInfo(res => {
+					callback && callback({ sys: common_params, user: res.userInfo }); // 执行回调
+				});
 			},
 		})
 	);

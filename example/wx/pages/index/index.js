@@ -31,16 +31,12 @@ Page({
   bindViewTap() {
     console.log(getApp())
     wx.navigateTo({
-
       url: '../logs/logs'
     })
-    // 手动埋点
-    getApp().$ta.track('document', {
-			// 发送需要采集的信息
-      dt: '查看启动日志',
-      dl: globalThis.location.href,
-    });
-    
+    app.$ta.track({
+      data:'随便什么数据',
+      libMethod:'自定义埋点'
+    })
   },
 
   sendError(){

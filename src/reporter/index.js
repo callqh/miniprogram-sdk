@@ -14,20 +14,37 @@ class Reporter {
 	 * 追踪埋点数据
 	 * @param {*} data 需要上报的数据
 	 */
-	track(data = {}, type = '自定义埋点') {
+	track(data = {}, type = 'Click') {
 		const config = store.get('config');
-
+		if (!data.eventId) {
+			data.eventId = type;
+		}
 		// 获取公参
 		getCommonParam(commonParam => {
 			// 添加一些公共信息字段
 			data.t = 'metric';
 			data.appKey = config.ak;
 			data.deviceId = storage.get('uid') || getUUID();
+			if (type.includes('AppStart')) {
+				data.nickName = commonParam.user.nickName;
+				data.gender = commonParam.user.gender;
+				data.avatarUrl = commonParam.user.avatarUrl;
+			}
+			if (data.libMethod) {
+				commonParam.sys.libMethod = data.libMethod;
+				delete data.libMethod;
+			}
 			// 添加用户的公参
-			const result = { ...data, ...commonParam, ...config.customParams };
+			const result = {
+				...commonParam.sys,
+				...data,
+				environment: config.environment,
+				...config.customParams,
+			};
+
 			logger(type, {
 				...data,
-				公参: commonParam,
+				公参: { ...commonParam.sys, environment: config.environment, pageURL: data.pageURL },
 				自定义参数: config.customParams,
 			});
 			this.queue.push(qs.stringify(result));

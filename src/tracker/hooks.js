@@ -1,4 +1,4 @@
-import { formatTimestamp, getPageTitle, getLaunchOptionsSync } from '../../utils';
+import { formatTimestamp, getLaunchOptionsSync } from '../../utils';
 // getPageTitle,
 import $ta from '../reporter';
 import store from '../store';
@@ -13,16 +13,13 @@ const CLICK_EVENT_TYPE = ['tap', 'longtap', 'longpress'];
 export const appLaunch = oldOnLunch =>
 	_proxyHooks(oldOnLunch, function () {
 		const { scene } = getLaunchOptionsSync();
-		const pageTitle = getPageTitle(this.route) || undefined;
 		const data = {
 			eventId: 'AppStart',
-			pageTitle,
-			pageURL: '',
+			pageURL: this.route,
 			scene,
-			// ...userInfo,
 			dateTime: formatTimestamp(Date.now()),
 		};
-		$ta.track(data, '$AppLunch');
+		$ta.track(data, '$AppStart');
 		// 启动完成将标志重置为true
 		store.set('is_launched', true);
 	});
@@ -35,32 +32,34 @@ export const appShow = oldOnShow =>
 		const data = {
 			eventId: 'AppShow',
 			scene,
+			pageURL: this.route,
 			dateTime: formatTimestamp(Date.now()),
 			...store.get('commonParam'),
 		};
 		// 仅第一次启动时发送该请求，并且该请求不必和launch事件重复发送
-		if (is_first_app_show && !is_not_launch) {
+		if (!is_first_app_show && is_not_launch) {
 			$ta.track(data, '$AppShow');
-			store.set('first_app_show', false);
 		}
+		store.set('first_app_show', false);
 	});
 
-export const appHide = oldOnHide => {
+export const appHide = oldOnHide =>
 	_proxyHooks(oldOnHide, function () {
 		const data = {
 			eventId: 'AppHide',
+			pageURL: this.route,
 			dateTime: formatTimestamp(Date.now()),
 		};
 		$ta.track(data, '$AppHide');
-		store.set('first_app_show', true);
+		// store.set('is_not_launch', true);
 	});
-};
 
 export const appError = oldOnError =>
 	_proxyHooks(oldOnError, function (err) {
 		const data = {
 			eventId: 'Error',
 			erType: err.type || 1,
+			pageURL: this.route,
 			erMsg: err,
 			dateTime: formatTimestamp(Date.now()),
 		};
@@ -76,22 +75,20 @@ export const appError = oldOnError =>
 export const pageShow = oldOnShow =>
 	_proxyHooks(oldOnShow, function () {
 		const time = Date.now();
-		const pageTitle = getPageTitle(this.route) || undefined;
 		store.set('pageShowTime', time);
 		const { scene, query } = getLaunchOptionsSync();
+		console.log('【 parseQuery(query) 】==>', parseQuery(query));
 
 		const data = {
 			eventId: 'Pageview',
-			pageTitle,
 			pageURL: this.route,
 			launchOptionsSync: scene,
-			query,
+			query: parseQuery(query),
 			...lastPageInfo,
 			dateTime: formatTimestamp(Date.now()),
 		};
 		$ta.track(data, '$PageView');
 		lastPageInfo = {
-			refPageTitle: pageTitle,
 			refPageURL: this.route,
 		};
 	});
@@ -103,18 +100,16 @@ export const pageShow = oldOnShow =>
  */
 export const pageHide = oldOnHide =>
 	_proxyHooks(oldOnHide, function () {
-		const pageTitle = getPageTitle(this.route) || undefined;
 		const pageStayTime = _getPageStayTime();
 		const data = {
-			eventId: 'PageJumpOff',
+			eventId: 'PageLeave',
 			unloadTime: formatTimestamp(Date.now()),
-			pageTitle,
 			pageURL: this.route,
 			offDuration: pageStayTime,
 			dateTime: formatTimestamp(Date.now()),
 		};
 		store.set('pageShowTime', -1);
-		$ta.track(data, '$PageHide');
+		$ta.track(data, '$PageLeave');
 	});
 
 /**
@@ -123,17 +118,16 @@ export const pageHide = oldOnHide =>
  */
 export const pageUnLoad = oldOnUnLoad =>
 	_proxyHooks(oldOnUnLoad, function () {
-		const pageTitle = getPageTitle(this.route) || undefined;
 		const pageStayTime = _getPageStayTime();
 		const data = {
-			eventId: 'AppOff',
-			pageTitle,
-			pageUrl: this.route,
+			eventId: 'PageLeave',
+			unloadTime: formatTimestamp(Date.now()),
+			pageURL: this.route,
 			offDuration: pageStayTime,
 			dateTime: formatTimestamp(Date.now()),
 		};
 		store.set('pageShowTime', -1);
-		$ta.track(data, '$PageUnload');
+		$ta.track(data, '$PageLeave');
 	});
 
 /**
@@ -145,18 +139,15 @@ export const pageShare = function (oldShare) {
 		const result = oldShare.apply(this);
 		const { scene } = getLaunchOptionsSync();
 
-		const pageTitle = getPageTitle(this.route) || undefined;
 		const data = {
 			eventId: 'Share',
-			pageTitle,
-			shareTitle: pageTitle,
+			shareTitle: result.title,
 			pageURL: this.route,
 			sharePath: this.route,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			shareDepth: scene === 1001 ? 0 : 1,
 			dateTime: formatTimestamp(Date.now()),
 			shareMethod: '转发消息卡片',
-			...result,
 		};
 		$ta.track(data, '$Share');
 	};
@@ -169,13 +160,12 @@ export const pageShare = function (oldShare) {
 export const shareTimeLine = function (oldShare) {
 	return function () {
 		const result = oldShare.apply(this);
+		console.log('【 result 】==>', result);
 		const { scene } = getLaunchOptionsSync();
 
-		const pageTitle = getPageTitle(this.route) || undefined;
 		const data = {
 			eventId: 'Share',
-			pageTitle,
-			shareTitle: pageTitle,
+			shareTitle: result.title,
 			pageURL: this.route,
 			sharePath: this.route,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -194,10 +184,8 @@ export const shareTimeLine = function (oldShare) {
  */
 export const addToFavorites = function () {
 	return function () {
-		const pageTitle = getPageTitle(this.route) || undefined;
 		const data = {
 			eventId: 'Collect',
-			pageTitle,
 			pageURL: this.route,
 			dateTime: formatTimestamp(Date.now()),
 		};
@@ -210,22 +198,22 @@ export const addToFavorites = function () {
  */
 export const pageClickEvent = oldEvent =>
 	_proxyHooks(oldEvent, function (e) {
-		let xp;
+		// let xp;
 		// 框架集成的话就获取xpath
-		if (store.get('config').octopus && e) {
-			const root = getCurrentPages()[0].data.root;
-			xp = getXPath(e.target, root, '/page');
-		}
+		// if (store.get('config').octopus && e) {
+		// 	const root = getCurrentPages()[0].data.root;
+		// 	xp = getXPath(e.target, root, '/page');
+		// }
 		// 保证采集的是事件触发元素
 		if (e && CLICK_EVENT_TYPE.includes(e.type) && e.target.id === e.currentTarget.id) {
 			const data = {
 				eventId: 'Click',
+				pageURL: this.route,
 				elementId: e.currentTarget.id,
-				elementLocation: xp,
-				x: e.detail && e.detail.x,
-				y: e.detail && e.detail.y,
+				dateTime: formatTimestamp(Date.now()),
+				elementLocation: `${e.detail && e.detail.x},${e.detail && e.detail.y}`,
 			};
-			$ta.track(data, '$ClickEvent');
+			$ta.track(data, '$Click');
 		}
 	});
 
@@ -267,19 +255,28 @@ function _getPageStayTime() {
  * @param {*} root
  * @returns
  */
-function getXPath(target, root) {
-	const id = target.id;
-	let res = '';
-	const help = (root, path) => {
-		for (let i = 0; i < root.cn.length; i++) {
-			let tmp = path + `/${root.cn[i].te}[${i}]`;
-			if (root.cn[i].id === id) {
-				res = tmp;
-				return;
-			}
-			help(root.cn[i], tmp);
-		}
-	};
-	help(root, res);
-	return res;
+// function getXPath(target, root) {
+// 	const id = target.id;
+// 	let res = '';
+// 	const help = (root, path) => {
+// 		for (let i = 0; i < root.cn.length; i++) {
+// 			let tmp = path + `/${root.cn[i].te}[${i}]`;
+// 			if (root.cn[i].id === id) {
+// 				res = tmp;
+// 				return;
+// 			}
+// 			help(root.cn[i], tmp);
+// 		}
+// 	};
+// 	help(root, res);
+// 	return res;
+// }
+
+function parseQuery(query) {
+	if (typeof query !== 'object') return '';
+	let result = '';
+	for (let prop in query) {
+		result += `${prop}=${query[prop]}&`;
+	}
+	return result.slice(0, result.length - 1);
 }

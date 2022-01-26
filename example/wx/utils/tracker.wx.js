@@ -1889,15 +1889,29 @@ class Reporter {
     this.timerId;
     this.resend_count = 0;
   }
-  track(data = {}, type = "\u81EA\u5B9A\u4E49\u57CB\u70B9") {
+  track(data = {}, type = "Click") {
     const config = _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config");
+    if (!data.eventId) {
+      data.eventId = type;
+    }
     (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getCommonParam)((commonParam) => {
       data.t = "metric";
       data.appKey = config.ak;
       data.deviceId = _utils__WEBPACK_IMPORTED_MODULE_1__.storage.get("uid") || (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getUUID)();
-      const result = __spreadValues(__spreadValues(__spreadValues({}, data), commonParam), config.customParams);
+      if (type.includes("AppStart")) {
+        data.nickName = commonParam.user.nickName;
+        data.gender = commonParam.user.gender;
+        data.avatarUrl = commonParam.user.avatarUrl;
+      }
+      if (data.libMethod) {
+        commonParam.sys.libMethod = data.libMethod;
+        delete data.libMethod;
+      }
+      const result = __spreadValues(__spreadProps(__spreadValues(__spreadValues({}, commonParam.sys), data), {
+        environment: config.environment
+      }), config.customParams);
       (0,_utils__WEBPACK_IMPORTED_MODULE_1__.logger)(type, __spreadProps(__spreadValues({}, data), {
-        \u516C\u53C2: commonParam,
+        \u516C\u53C2: __spreadProps(__spreadValues({}, commonParam.sys), { environment: config.environment, pageURL: data.pageURL }),
         \u81EA\u5B9A\u4E49\u53C2\u6570: config.customParams
       }));
       this.queue.push(qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(result));
@@ -1977,10 +1991,11 @@ const defaultConfig = {
     pageCollect: true,
     pageClickEvent: true
   },
+  environment: 0,
   customParams: {},
   debug: true,
   timeout: 5e3,
-  delay: 3e3,
+  delay: 1e3,
   octopus: false
 };
 
@@ -2085,15 +2100,13 @@ let lastPageInfo = {
 const CLICK_EVENT_TYPE = ["tap", "longtap", "longpress"];
 const appLaunch = (oldOnLunch) => _proxyHooks(oldOnLunch, function() {
   const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
-  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   const data = {
     eventId: "AppStart",
-    pageTitle,
-    pageURL: "",
+    pageURL: this.route,
     scene,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppLunch");
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppStart");
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("is_launched", true);
 });
 const appShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
@@ -2103,27 +2116,27 @@ const appShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
   const data = __spreadValues({
     eventId: "AppShow",
     scene,
+    pageURL: this.route,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   }, _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("commonParam"));
-  if (is_first_app_show && !is_not_launch) {
+  if (!is_first_app_show && is_not_launch) {
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppShow");
-    _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("first_app_show", false);
   }
+  _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("first_app_show", false);
 });
-const appHide = (oldOnHide) => {
-  _proxyHooks(oldOnHide, function() {
-    const data = {
-      eventId: "AppHide",
-      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
-    };
-    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppHide");
-    _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("first_app_show", true);
-  });
-};
+const appHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
+  const data = {
+    eventId: "AppHide",
+    pageURL: this.route,
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+  };
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppHide");
+});
 const appError = (oldOnError) => _proxyHooks(oldOnError, function(err) {
   const data = {
     eventId: "Error",
     erType: err.type || 1,
+    pageURL: this.route,
     erMsg: err,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
@@ -2131,78 +2144,70 @@ const appError = (oldOnError) => _proxyHooks(oldOnError, function(err) {
 });
 const pageShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
   const time = Date.now();
-  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", time);
   const { scene, query } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
+  console.log("\u3010 parseQuery(query) \u3011==>", parseQuery(query));
   const data = __spreadProps(__spreadValues({
     eventId: "Pageview",
-    pageTitle,
     pageURL: this.route,
     launchOptionsSync: scene,
-    query
+    query: parseQuery(query)
   }, lastPageInfo), {
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   });
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageView");
   lastPageInfo = {
-    refPageTitle: pageTitle,
     refPageURL: this.route
   };
 });
 const pageHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
-  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   const pageStayTime = _getPageStayTime();
   const data = {
-    eventId: "PageJumpOff",
+    eventId: "PageLeave",
     unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
-    pageTitle,
     pageURL: this.route,
     offDuration: pageStayTime,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageHide");
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageLeave");
 });
 const pageUnLoad = (oldOnUnLoad) => _proxyHooks(oldOnUnLoad, function() {
-  const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
   const pageStayTime = _getPageStayTime();
   const data = {
-    eventId: "AppOff",
-    pageTitle,
-    pageUrl: this.route,
+    eventId: "PageLeave",
+    unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+    pageURL: this.route,
     offDuration: pageStayTime,
     dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
-  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageUnload");
+  _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageLeave");
 });
 const pageShare = function(oldShare) {
   return function() {
     const result = oldShare.apply(this);
     const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
-    const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
-    const data = __spreadValues({
+    const data = {
       eventId: "Share",
-      pageTitle,
-      shareTitle: pageTitle,
+      shareTitle: result.title,
       pageURL: this.route,
       sharePath: this.route,
       shareDepth: scene === 1001 ? 0 : 1,
       dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
       shareMethod: "\u8F6C\u53D1\u6D88\u606F\u5361\u7247"
-    }, result);
+    };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
   };
 };
 const shareTimeLine = function(oldShare) {
   return function() {
     const result = oldShare.apply(this);
+    console.log("\u3010 result \u3011==>", result);
     const { scene } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
-    const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
     const data = __spreadValues({
       eventId: "Share",
-      pageTitle,
-      shareTitle: pageTitle,
+      shareTitle: result.title,
       pageURL: this.route,
       sharePath: this.route,
       shareDepth: scene === 1001 ? 0 : 1,
@@ -2214,10 +2219,8 @@ const shareTimeLine = function(oldShare) {
 };
 const addToFavorites = function() {
   return function() {
-    const pageTitle = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getPageTitle)(this.route) || void 0;
     const data = {
       eventId: "Collect",
-      pageTitle,
       pageURL: this.route,
       dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
     };
@@ -2225,20 +2228,15 @@ const addToFavorites = function() {
   };
 };
 const pageClickEvent = (oldEvent) => _proxyHooks(oldEvent, function(e) {
-  let xp;
-  if (_store__WEBPACK_IMPORTED_MODULE_2__["default"].get("config").octopus && e) {
-    const root = getCurrentPages()[0].data.root;
-    xp = getXPath(e.target, root, "/page");
-  }
   if (e && CLICK_EVENT_TYPE.includes(e.type) && e.target.id === e.currentTarget.id) {
     const data = {
       eventId: "Click",
+      pageURL: this.route,
       elementId: e.currentTarget.id,
-      elementLocation: xp,
-      x: e.detail && e.detail.x,
-      y: e.detail && e.detail.y
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+      elementLocation: `${e.detail && e.detail.x},${e.detail && e.detail.y}`
     };
-    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$ClickEvent");
+    _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Click");
   }
 });
 function _proxyHooks(fn = function() {
@@ -2258,21 +2256,14 @@ function _getPageStayTime() {
   }
   return pageStayTime;
 }
-function getXPath(target, root) {
-  const id = target.id;
-  let res = "";
-  const help = (root2, path) => {
-    for (let i = 0; i < root2.cn.length; i++) {
-      let tmp = path + `/${root2.cn[i].te}[${i}]`;
-      if (root2.cn[i].id === id) {
-        res = tmp;
-        return;
-      }
-      help(root2.cn[i], tmp);
-    }
-  };
-  help(root, res);
-  return res;
+function parseQuery(query) {
+  if (typeof query !== "object")
+    return "";
+  let result = "";
+  for (let prop in query) {
+    result += `${prop}=${query[prop]}&`;
+  }
+  return result.slice(0, result.length - 1);
 }
 
 
@@ -2511,6 +2502,7 @@ function getCommonParam(callback) {
       if (res) {
         common_params = {
           distinctId: getUUID(),
+          sessionId: getUUID(),
           appPlatform: "MP",
           access,
           lib: "js",
@@ -2527,7 +2519,9 @@ function getCommonParam(callback) {
       }
     },
     complete() {
-      callback && callback(common_params);
+      getUserInfo((res) => {
+        callback && callback({ sys: common_params, user: res.userInfo });
+      });
     }
   }));
 }
@@ -2573,8 +2567,11 @@ function getPageTitle(route) {
   route = route + ".html";
   try {
     if (__wxConfig) {
+      console.log("\u3010 __wxConfig \u3011==>", __wxConfig);
       const routeConfigList = __wxConfig.page || {};
+      console.log("\u3010 routeConfigList[route] \u3011==>", routeConfigList);
       const current_page_config = routeConfigList[route].window;
+      console.log("\u3010 current_page_config \u3011==>", current_page_config);
       return current_page_config.navigationBarTitleText;
     }
   } catch (err) {

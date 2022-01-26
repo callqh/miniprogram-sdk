@@ -15,11 +15,12 @@ export const defaultConfig = {
 		pageCollect: true,
 		pageClickEvent: true,
 	},
+	environment: 0,
 	customParams: {},
 	debug: true,
 	// 请求超时
 	timeout: 5000,
 	// 请求延时
-	delay: 3000,
+	delay: 1000,
 	octopus: false,
 };
