@@ -1893,10 +1893,11 @@ class Reporter {
     const config = _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config");
     if (!data.eventId) {
       data.eventId = type;
+      data.dateTime = Date.now();
     }
     (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getCommonParam)((commonParam) => {
       data.t = "metric";
-      data.appKey = config.ak;
+      data.appKey = config.appKey;
       data.deviceId = _utils__WEBPACK_IMPORTED_MODULE_1__.storage.get("uid") || (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getUUID)();
       if (type.includes("AppStart")) {
         data.nickName = commonParam.user.nickName;
@@ -1908,10 +1909,15 @@ class Reporter {
         delete data.libMethod;
       }
       const result = __spreadValues(__spreadProps(__spreadValues(__spreadValues({}, commonParam.sys), data), {
-        environment: config.environment
+        environment: config.environment,
+        appName: config.appName
       }), config.customParams);
       (0,_utils__WEBPACK_IMPORTED_MODULE_1__.logger)(type, __spreadProps(__spreadValues({}, data), {
-        \u516C\u53C2: __spreadProps(__spreadValues({}, commonParam.sys), { environment: config.environment, pageURL: data.pageURL }),
+        \u516C\u53C2: __spreadProps(__spreadValues({}, commonParam.sys), {
+          environment: config.environment,
+          pageURL: data.pageURL,
+          appName: config.appName
+        }),
         \u81EA\u5B9A\u4E49\u53C2\u6570: config.customParams
       }));
       this.queue.push(qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(result));
@@ -1925,15 +1931,15 @@ class Reporter {
   _flush() {
     const config = _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config");
     const commonMsg = {
-      ak: config.ak,
+      ak: config.appKey,
       cid: _utils__WEBPACK_IMPORTED_MODULE_1__.storage.get("cid"),
       uid: _utils__WEBPACK_IMPORTED_MODULE_1__.storage.get("uid") || 0
     };
     if (this.queue.length > 0) {
       const data = this.queue[0];
       _platform__WEBPACK_IMPORTED_MODULE_2__["default"].request({
-        url: config.url,
-        timeout: config.request_timeout,
+        url: config.collectorUrl,
+        timeout: config.timeout,
         method: "POST",
         header: { "content-type": "application/x-www-form-urlencoded" },
         data: __spreadProps(__spreadValues({}, commonMsg), {
@@ -1952,9 +1958,7 @@ class Reporter {
           }
         },
         complete: () => {
-          setTimeout(() => {
-            this._flush();
-          }, _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config").delay);
+          this._flush();
         }
       });
     } else {
@@ -1979,8 +1983,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "defaultConfig": () => (/* binding */ defaultConfig)
 /* harmony export */ });
 const defaultConfig = {
-  url: "",
-  ak: "",
+  collectorUrl: "",
+  appKey: "",
   autoTrack: {
     appLaunch: true,
     appShow: true,
@@ -2015,8 +2019,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _defaultConfig__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./defaultConfig */ "./src/store/defaultConfig.js");
 /* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils */ "./utils/index.js");
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
 
 
+function readConfigFile() {
+  return __async(this, null, function* () {
+    try {
+      const text = yield fetch(url).then((response) => response.text());
+      console.log("\u3010 text \u3011==>", text);
+    } catch (e) {
+    }
+  });
+}
 class Store {
   constructor() {
     this.store = {
@@ -2024,6 +2057,7 @@ class Store {
       first_app_show: true,
       is_launched: false
     };
+    readConfigFile();
   }
   set(key, value) {
     if (key === "config") {
@@ -2104,7 +2138,7 @@ const appLaunch = (oldOnLunch) => _proxyHooks(oldOnLunch, function() {
     eventId: "AppStart",
     pageURL: this.route,
     scene,
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   };
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppStart");
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("is_launched", true);
@@ -2117,7 +2151,7 @@ const appShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
     eventId: "AppShow",
     scene,
     pageURL: this.route,
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   }, _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("commonParam"));
   if (!is_first_app_show && is_not_launch) {
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppShow");
@@ -2128,7 +2162,7 @@ const appHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
   const data = {
     eventId: "AppHide",
     pageURL: this.route,
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   };
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppHide");
 });
@@ -2138,7 +2172,7 @@ const appError = (oldOnError) => _proxyHooks(oldOnError, function(err) {
     erType: err.type || 1,
     pageURL: this.route,
     erMsg: err,
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   };
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Error");
 });
@@ -2153,7 +2187,7 @@ const pageShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
     launchOptionsSync: scene,
     query: parseQuery(query)
   }, lastPageInfo), {
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   });
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageView");
   lastPageInfo = {
@@ -2164,10 +2198,10 @@ const pageHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
   const pageStayTime = _getPageStayTime();
   const data = {
     eventId: "PageLeave",
-    unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+    unloadTime: Date.now(),
     pageURL: this.route,
     offDuration: pageStayTime,
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageLeave");
@@ -2176,10 +2210,10 @@ const pageUnLoad = (oldOnUnLoad) => _proxyHooks(oldOnUnLoad, function() {
   const pageStayTime = _getPageStayTime();
   const data = {
     eventId: "PageLeave",
-    unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+    unloadTime: Date.now(),
     pageURL: this.route,
     offDuration: pageStayTime,
-    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+    dateTime: Date.now()
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageLeave");
@@ -2194,7 +2228,7 @@ const pageShare = function(oldShare) {
       pageURL: this.route,
       sharePath: this.route,
       shareDepth: scene === 1001 ? 0 : 1,
-      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+      dateTime: Date.now(),
       shareMethod: "\u8F6C\u53D1\u6D88\u606F\u5361\u7247"
     };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
@@ -2211,7 +2245,7 @@ const shareTimeLine = function(oldShare) {
       pageURL: this.route,
       sharePath: this.route,
       shareDepth: scene === 1001 ? 0 : 1,
-      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+      dateTime: Date.now(),
       shareMethod: "\u670B\u53CB\u5708\u5206\u4EAB"
     }, result);
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
@@ -2222,7 +2256,7 @@ const addToFavorites = function() {
     const data = {
       eventId: "Collect",
       pageURL: this.route,
-      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
+      dateTime: Date.now()
     };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Collect");
   };
@@ -2233,7 +2267,7 @@ const pageClickEvent = (oldEvent) => _proxyHooks(oldEvent, function(e) {
       eventId: "Click",
       pageURL: this.route,
       elementId: e.currentTarget.id,
-      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
+      dateTime: Date.now(),
       elementLocation: `${e.detail && e.detail.x},${e.detail && e.detail.y}`
     };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Click");
@@ -2630,7 +2664,7 @@ const storage = {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"tracker","version":"1.0.0","description":"","main":"dist/index.js","scripts":{"dev:wx":"cross-env PLATFORM=wx NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:alipay":"cross-env PLATFORM=alipay NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bd":"cross-env PLATFORM=bd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:dd":"cross-env PLATFORM=dd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bytedance":"cross-env PLATFORM=bytedance NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:jd":"cross-env PLATFORM=jd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","build":"sh ./build/build.sh ","build:wx":"cross-env PLATFORM=wx webpack --config build/webpack.prod.js --mode production","build:alipay":"cross-env PLATFORM=alipay webpack --config build/webpack.prod.js --mode production ","build:dd":"cross-env PLATFORM=dd webpack --config build/webpack.prod.js --mode production ","build:bytedance":"cross-env PLATFORM=bytedance webpack --config build/webpack.prod.js --mode production ","build:jd":"cross-env PLATFORM=jd webpack --config build/webpack.prod.js --mode production "},"author":"liuqh","license":"ISC","devDependencies":{"@typescript-eslint/eslint-plugin":"^4.31.1","@typescript-eslint/parser":"^4.31.1","clean-webpack-plugin":"^4.0.0","copy-webpack-plugin":"^9.0.1","cross-env":"^7.0.3","eslint":"^7.32.0","eslint-config-prettier":"^8.3.0","eslint-plugin-prettier":"^4.0.0","ts-loader":"^9.2.5","typescript":"^4.4.3","webpack":"^5.53.0","webpack-cli":"^4.8.0"},"dependencies":{"babel-loader":"^8.2.2","esbuild-loader":"^2.15.1","qs":"^6.10.1"}}');
+module.exports = JSON.parse('{"name":"tracker","version":"1.0.0","description":"","main":"dist/index.js","scripts":{"dev:wx":"cross-env PLATFORM=wx NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:alipay":"cross-env PLATFORM=alipay NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bd":"cross-env PLATFORM=bd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:dd":"cross-env PLATFORM=dd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bytedance":"cross-env PLATFORM=bytedance NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:jd":"cross-env PLATFORM=jd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","build":"sh ./build/build.sh ","build:wx":"cross-env PLATFORM=wx webpack --config build/webpack.prod.js --mode production","build:alipay":"cross-env PLATFORM=alipay webpack --config build/webpack.prod.js --mode production ","build:dd":"cross-env PLATFORM=dd webpack --config build/webpack.prod.js --mode production ","build:bytedance":"cross-env PLATFORM=bytedance webpack --config build/webpack.prod.js --mode production ","build:jd":"cross-env PLATFORM=jd webpack --config build/webpack.prod.js --mode production "},"author":"liuqh","license":"ISC","devDependencies":{"@typescript-eslint/eslint-plugin":"^4.31.1","@typescript-eslint/parser":"^4.31.1","clean-webpack-plugin":"^4.0.0","copy-webpack-plugin":"^9.0.1","cross-env":"^7.0.3","eslint":"^7.32.0","eslint-config-prettier":"^8.3.0","eslint-plugin-prettier":"^4.0.0","ts-loader":"^9.2.5","typescript":"^4.4.3","webpack":"^5.53.0","webpack-cli":"^4.8.0"},"dependencies":{"babel-loader":"^8.2.2","esbuild-loader":"^2.15.1","fs-jetpack":"^4.3.1","qs":"^6.10.1","stream-browserify":"^3.0.0"}}');
 
 /***/ })
 

@@ -1,25 +1,7 @@
 // app.js
 import t from './utils/tracker.wx';
 
-t.init({
-	ak: 'f128205523d8f4c5e9d186a28b171192c',
-	url: 'https://tracking-collector-dev.app.terminus.io/collect',
-	autoTrack: {
-		appLaunch: true,
-		appShow: true,
-		appHide: true,
-		pageShow: true,
-		pageLeave: true,
-		pageShare: true,
-		pageCollect:true,
-		pageClickEvent: true,
-	},
-	// 自定义公参
-	customParams: {
-		appName: "测试Demo"
-	},
-	debug: true,
-});
+t.init({});
 
 App({
 	onLaunch(options) {

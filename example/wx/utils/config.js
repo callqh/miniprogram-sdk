@@ -1,0 +1,21 @@
+export default {
+	appKey: 'sdafsdfafdsafa',
+	appName: 'appName',
+	appPlatform: 'MP',
+	collectorUrl: 'https://www.baidu.com',
+	autoTrack: {
+		appLaunch: true,
+		appShow: true,
+		appHide: true,
+		pageShow: true,
+		pageLeave: true,
+		pageShare: true,
+		pageCollect: true,
+		pageClickEvent: true,
+	},
+	environment: 0,
+	customParams: {},
+	debug: true,
+	timeout: 5000,
+	delay: 1000,
+};
