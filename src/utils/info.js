@@ -1,6 +1,6 @@
-import platform from '../src/platform';
-import store from '../src/store';
-import pkg from '../package.json';
+import platform from '../platform';
+import store from '../store';
+import pkg from '../../package.json';
 // 埋点sdk的版本号
 const libVersion = pkg.version;
 /**

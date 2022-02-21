@@ -1,7 +1,7 @@
 // app.js
 import t from './utils/tracker.wx';
-
-t.init({});
+import config from './utils/config'
+t.init(config);
 
 App({
 	onLaunch(options) {

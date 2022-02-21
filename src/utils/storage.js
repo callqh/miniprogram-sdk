@@ -1,4 +1,4 @@
-import platform from '../src/platform';
+import platform from '../platform';
 
 const prefix = 'terminus-track-';
 /**

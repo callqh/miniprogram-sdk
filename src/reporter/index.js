@@ -1,7 +1,7 @@
 import store from '../store';
-import { getCommonParam, getUUID, logger, storage } from '../../utils';
+import { getCommonParam, getUUID, logger, storage } from '../utils';
 import platform from '../platform';
-import qs from 'qs';
+import { stringify } from 'qs';
 
 class Reporter {
 	constructor() {
@@ -23,7 +23,7 @@ class Reporter {
 		getCommonParam(commonParam => {
 			// 添加一些公共信息字段
 			data.t = 'metric';
-			data.appKey = config.ak;
+			data.appKey = config.appKey;
 			data.deviceId = storage.get('uid') || getUUID();
 			if (type.includes('AppStart')) {
 				data.nickName = commonParam.user.nickName;
@@ -47,7 +47,7 @@ class Reporter {
 				公参: { ...commonParam.sys, environment: config.environment, pageURL: data.pageURL },
 				自定义参数: config.customParams,
 			});
-			this.queue.push(qs.stringify(result));
+			this.queue.push(stringify(result));
 			if (!this.timerId) {
 				// 为了不影响正常的业务请求，这里延时发出我们的埋点信息
 				this.timerId = setTimeout(() => {
@@ -64,7 +64,7 @@ class Reporter {
 
 		// 发送请求时需要的一些公共信息
 		const commonMsg = {
-			ak: config.ak,
+			ak: config.appKey,
 			cid: storage.get('cid'),
 			uid: storage.get('uid') || 0,
 		};
@@ -73,7 +73,7 @@ class Reporter {
 			const data = this.queue[0];
 			platform.request({
 				// 请求地址
-				url: config.url,
+				url: config.collectorUrl,
 				// 超时时间
 				timeout: config.request_timeout,
 				method: 'POST',

@@ -223,7 +223,7 @@ var INTRINSICS = {
   "%IteratorPrototype%": hasSymbols ? getProto(getProto([][Symbol.iterator]())) : undefined,
   "%JSON%": typeof JSON === "object" ? JSON : undefined,
   "%Map%": typeof Map === "undefined" ? undefined : Map,
-  "%MapIteratorPrototype%": typeof Map === "undefined" || !hasSymbols ? undefined : getProto(new Map()[Symbol.iterator]()),
+  "%MapIteratorPrototype%": typeof Map === "undefined" || !hasSymbols ? undefined : getProto((/* @__PURE__ */ new Map())[Symbol.iterator]()),
   "%Math%": Math,
   "%Number%": Number,
   "%Object%": Object,
@@ -236,7 +236,7 @@ var INTRINSICS = {
   "%Reflect%": typeof Reflect === "undefined" ? undefined : Reflect,
   "%RegExp%": RegExp,
   "%Set%": typeof Set === "undefined" ? undefined : Set,
-  "%SetIteratorPrototype%": typeof Set === "undefined" || !hasSymbols ? undefined : getProto(new Set()[Symbol.iterator]()),
+  "%SetIteratorPrototype%": typeof Set === "undefined" || !hasSymbols ? undefined : getProto((/* @__PURE__ */ new Set())[Symbol.iterator]()),
   "%SharedArrayBuffer%": typeof SharedArrayBuffer === "undefined" ? undefined : SharedArrayBuffer,
   "%String%": String,
   "%StringIteratorPrototype%": hasSymbols ? getProto(""[Symbol.iterator]()) : undefined,
@@ -559,18 +559,42 @@ var weakRefDeref = hasWeakRef ? WeakRef.prototype.deref : null;
 var booleanValueOf = Boolean.prototype.valueOf;
 var objectToString = Object.prototype.toString;
 var functionToString = Function.prototype.toString;
-var match = String.prototype.match;
+var $match = String.prototype.match;
+var $slice = String.prototype.slice;
+var $replace = String.prototype.replace;
+var $toUpperCase = String.prototype.toUpperCase;
+var $toLowerCase = String.prototype.toLowerCase;
+var $test = RegExp.prototype.test;
+var $concat = Array.prototype.concat;
+var $join = Array.prototype.join;
+var $arrSlice = Array.prototype.slice;
+var $floor = Math.floor;
 var bigIntValueOf = typeof BigInt === "function" ? BigInt.prototype.valueOf : null;
 var gOPS = Object.getOwnPropertySymbols;
 var symToString = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? Symbol.prototype.toString : null;
 var hasShammedSymbols = typeof Symbol === "function" && typeof Symbol.iterator === "object";
+var toStringTag = typeof Symbol === "function" && Symbol.toStringTag && (typeof Symbol.toStringTag === hasShammedSymbols ? "object" : "symbol") ? Symbol.toStringTag : null;
 var isEnumerable = Object.prototype.propertyIsEnumerable;
 var gPO = (typeof Reflect === "function" ? Reflect.getPrototypeOf : Object.getPrototypeOf) || ([].__proto__ === Array.prototype ? function(O) {
   return O.__proto__;
 } : null);
-var inspectCustom = __webpack_require__(/*! ./util.inspect */ "?4f7e").custom;
+function addNumericSeparator(num, str) {
+  if (num === Infinity || num === -Infinity || num !== num || num && num > -1e3 && num < 1e3 || $test.call(/e/, str)) {
+    return str;
+  }
+  var sepRegex = /[0-9](?=(?:[0-9]{3})+(?![0-9]))/g;
+  if (typeof num === "number") {
+    var int = num < 0 ? -$floor(-num) : $floor(num);
+    if (int !== num) {
+      var intStr = String(int);
+      var dec = $slice.call(str, intStr.length + 1);
+      return $replace.call(intStr, sepRegex, "$&_") + "." + $replace.call($replace.call(dec, /([0-9]{3})/g, "$&_"), /_$/, "");
+    }
+  }
+  return $replace.call(str, sepRegex, "$&_");
+}
+var inspectCustom = (__webpack_require__(/*! ./util.inspect */ "?4f7e").custom);
 var inspectSymbol = inspectCustom && isSymbol(inspectCustom) ? inspectCustom : null;
-var toStringTag = typeof Symbol === "function" && typeof Symbol.toStringTag !== "undefined" ? Symbol.toStringTag : null;
 module.exports = function inspect_(obj, options, depth, seen) {
   var opts = options || {};
   if (has(opts, "quoteStyle") && (opts.quoteStyle !== "single" && opts.quoteStyle !== "double")) {
@@ -584,8 +608,12 @@ module.exports = function inspect_(obj, options, depth, seen) {
     throw new TypeError("option \"customInspect\", if provided, must be `true`, `false`, or `'symbol'`");
   }
   if (has(opts, "indent") && opts.indent !== null && opts.indent !== "	" && !(parseInt(opts.indent, 10) === opts.indent && opts.indent > 0)) {
-    throw new TypeError('options "indent" must be "\\t", an integer > 0, or `null`');
+    throw new TypeError('option "indent" must be "\\t", an integer > 0, or `null`');
   }
+  if (has(opts, "numericSeparator") && typeof opts.numericSeparator !== "boolean") {
+    throw new TypeError('option "numericSeparator", if provided, must be `true` or `false`');
+  }
+  var numericSeparator = opts.numericSeparator;
   if (typeof obj === "undefined") {
     return "undefined";
   }
@@ -602,10 +630,12 @@ module.exports = function inspect_(obj, options, depth, seen) {
     if (obj === 0) {
       return Infinity / obj > 0 ? "0" : "-0";
     }
-    return String(obj);
+    var str = String(obj);
+    return numericSeparator ? addNumericSeparator(obj, str) : str;
   }
   if (typeof obj === "bigint") {
-    return String(obj) + "n";
+    var bigIntStr = String(obj) + "n";
+    return numericSeparator ? addNumericSeparator(obj, bigIntStr) : bigIntStr;
   }
   var maxDepth = typeof opts.depth === "undefined" ? 5 : opts.depth;
   if (typeof depth === "undefined") {
@@ -622,7 +652,7 @@ module.exports = function inspect_(obj, options, depth, seen) {
   }
   function inspect(value, from, noIndent) {
     if (from) {
-      seen = seen.slice();
+      seen = $arrSlice.call(seen);
       seen.push(from);
     }
     if (noIndent) {
@@ -639,14 +669,14 @@ module.exports = function inspect_(obj, options, depth, seen) {
   if (typeof obj === "function") {
     var name = nameOf(obj);
     var keys = arrObjKeys(obj, inspect);
-    return "[Function" + (name ? ": " + name : " (anonymous)") + "]" + (keys.length > 0 ? " { " + keys.join(", ") + " }" : "");
+    return "[Function" + (name ? ": " + name : " (anonymous)") + "]" + (keys.length > 0 ? " { " + $join.call(keys, ", ") + " }" : "");
   }
   if (isSymbol(obj)) {
-    var symString = hasShammedSymbols ? String(obj).replace(/^(Symbol\(.*\))_[^)]*$/, "$1") : symToString.call(obj);
+    var symString = hasShammedSymbols ? $replace.call(String(obj), /^(Symbol\(.*\))_[^)]*$/, "$1") : symToString.call(obj);
     return typeof obj === "object" && !hasShammedSymbols ? markBoxed(symString) : symString;
   }
   if (isElement(obj)) {
-    var s = "<" + String(obj.nodeName).toLowerCase();
+    var s = "<" + $toLowerCase.call(String(obj.nodeName));
     var attrs = obj.attributes || [];
     for (var i = 0; i < attrs.length; i++) {
       s += " " + attrs[i].name + "=" + wrapQuotes(quote(attrs[i].value), "double", opts);
@@ -655,7 +685,7 @@ module.exports = function inspect_(obj, options, depth, seen) {
     if (obj.childNodes && obj.childNodes.length) {
       s += "...";
     }
-    s += "</" + String(obj.nodeName).toLowerCase() + ">";
+    s += "</" + $toLowerCase.call(String(obj.nodeName)) + ">";
     return s;
   }
   if (isArray(obj)) {
@@ -666,14 +696,17 @@ module.exports = function inspect_(obj, options, depth, seen) {
     if (indent && !singleLineValues(xs)) {
       return "[" + indentedJoin(xs, indent) + "]";
     }
-    return "[ " + xs.join(", ") + " ]";
+    return "[ " + $join.call(xs, ", ") + " ]";
   }
   if (isError(obj)) {
     var parts = arrObjKeys(obj, inspect);
+    if ("cause" in obj && !isEnumerable.call(obj, "cause")) {
+      return "{ [" + String(obj) + "] " + $join.call($concat.call("[cause]: " + inspect(obj.cause), parts), ", ") + " }";
+    }
     if (parts.length === 0) {
       return "[" + String(obj) + "]";
     }
-    return "{ [" + String(obj) + "] " + parts.join(", ") + " }";
+    return "{ [" + String(obj) + "] " + $join.call(parts, ", ") + " }";
   }
   if (typeof obj === "object" && customInspect) {
     if (inspectSymbol && typeof obj[inspectSymbol] === "function") {
@@ -721,16 +754,16 @@ module.exports = function inspect_(obj, options, depth, seen) {
     var ys = arrObjKeys(obj, inspect);
     var isPlainObject = gPO ? gPO(obj) === Object.prototype : obj instanceof Object || obj.constructor === Object;
     var protoTag = obj instanceof Object ? "" : "null prototype";
-    var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? toStr(obj).slice(8, -1) : protoTag ? "Object" : "";
+    var stringTag = !isPlainObject && toStringTag && Object(obj) === obj && toStringTag in obj ? $slice.call(toStr(obj), 8, -1) : protoTag ? "Object" : "";
     var constructorTag = isPlainObject || typeof obj.constructor !== "function" ? "" : obj.constructor.name ? obj.constructor.name + " " : "";
-    var tag = constructorTag + (stringTag || protoTag ? "[" + [].concat(stringTag || [], protoTag || []).join(": ") + "] " : "");
+    var tag = constructorTag + (stringTag || protoTag ? "[" + $join.call($concat.call([], stringTag || [], protoTag || []), ": ") + "] " : "");
     if (ys.length === 0) {
       return tag + "{}";
     }
     if (indent) {
       return tag + "{" + indentedJoin(ys, indent) + "}";
     }
-    return tag + "{ " + ys.join(", ") + " }";
+    return tag + "{ " + $join.call(ys, ", ") + " }";
   }
   return String(obj);
 };
@@ -739,7 +772,7 @@ function wrapQuotes(s, defaultStyle, opts) {
   return quoteChar + s + quoteChar;
 }
 function quote(s) {
-  return String(s).replace(/"/g, "&quot;");
+  return $replace.call(String(s), /"/g, "&quot;");
 }
 function isArray(obj) {
   return toStr(obj) === "[object Array]" && (!toStringTag || !(typeof obj === "object" && toStringTag in obj));
@@ -803,7 +836,7 @@ function nameOf(f) {
   if (f.name) {
     return f.name;
   }
-  var m = match.call(functionToString.call(f), /^function\s*([\w$]+)/);
+  var m = $match.call(functionToString.call(f), /^function\s*([\w$]+)/);
   if (m) {
     return m[1];
   }
@@ -908,9 +941,9 @@ function inspectString(str, opts) {
   if (str.length > opts.maxStringLength) {
     var remaining = str.length - opts.maxStringLength;
     var trailer = "... " + remaining + " more character" + (remaining > 1 ? "s" : "");
-    return inspectString(str.slice(0, opts.maxStringLength), opts) + trailer;
+    return inspectString($slice.call(str, 0, opts.maxStringLength), opts) + trailer;
   }
-  var s = str.replace(/(['\\])/g, "\\$1").replace(/[\x00-\x1f]/g, lowbyte);
+  var s = $replace.call($replace.call(str, /(['\\])/g, "\\$1"), /[\x00-\x1f]/g, lowbyte);
   return wrapQuotes(s, "single", opts);
 }
 function lowbyte(c) {
@@ -925,7 +958,7 @@ function lowbyte(c) {
   if (x) {
     return "\\" + x;
   }
-  return "\\x" + (n < 16 ? "0" : "") + n.toString(16).toUpperCase();
+  return "\\x" + (n < 16 ? "0" : "") + $toUpperCase.call(n.toString(16));
 }
 function markBoxed(str) {
   return "Object(" + str + ")";
@@ -934,7 +967,7 @@ function weakCollectionOf(type) {
   return type + " { ? }";
 }
 function collectionOf(type, size, entries, indent) {
-  var joinedEntries = indent ? indentedJoin(entries, indent) : entries.join(", ");
+  var joinedEntries = indent ? indentedJoin(entries, indent) : $join.call(entries, ", ");
   return type + " (" + size + ") {" + joinedEntries + "}";
 }
 function singleLineValues(xs) {
@@ -950,13 +983,13 @@ function getIndent(opts, depth) {
   if (opts.indent === "	") {
     baseIndent = "	";
   } else if (typeof opts.indent === "number" && opts.indent > 0) {
-    baseIndent = Array(opts.indent + 1).join(" ");
+    baseIndent = $join.call(Array(opts.indent + 1), " ");
   } else {
     return null;
   }
   return {
     base: baseIndent,
-    prev: Array(depth + 1).join(baseIndent)
+    prev: $join.call(Array(depth + 1), baseIndent)
   };
 }
 function indentedJoin(xs, indent) {
@@ -964,7 +997,7 @@ function indentedJoin(xs, indent) {
     return "";
   }
   var lineJoiner = "\n" + indent.prev + indent.base;
-  return lineJoiner + xs.join("," + lineJoiner) + "\n" + indent.prev;
+  return lineJoiner + $join.call(xs, "," + lineJoiner) + "\n" + indent.prev;
 }
 function arrObjKeys(obj, inspect) {
   var isArr = isArray(obj);
@@ -992,7 +1025,7 @@ function arrObjKeys(obj, inspect) {
     }
     if (hasShammedSymbols && symMap["$" + key] instanceof Symbol) {
       continue;
-    } else if (/[^\w$]/.test(key)) {
+    } else if ($test.call(/[^\w$]/, key)) {
       xs.push(inspect(key, obj) + ": " + inspect(obj[key], obj));
     } else {
       xs.push(key + ": " + inspect(obj[key], obj));
@@ -1164,7 +1197,7 @@ var parseObject = function(chain, val, options, valuesParsed) {
     if (root === "[]" && options.parseArrays) {
       obj = [].concat(leaf);
     } else {
-      obj = options.plainObjects ? Object.create(null) : {};
+      obj = options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
       var cleanRoot = root.charAt(0) === "[" && root.charAt(root.length - 1) === "]" ? root.slice(1, -1) : root;
       var index = parseInt(cleanRoot, 10);
       if (!options.parseArrays && cleanRoot === "") {
@@ -1172,7 +1205,7 @@ var parseObject = function(chain, val, options, valuesParsed) {
       } else if (!isNaN(index) && root !== cleanRoot && String(index) === cleanRoot && index >= 0 && (options.parseArrays && index <= options.arrayLimit)) {
         obj = [];
         obj[index] = leaf;
-      } else {
+      } else if (cleanRoot !== "__proto__") {
         obj[cleanRoot] = leaf;
       }
     }
@@ -1246,10 +1279,10 @@ var normalizeParseOptions = function normalizeParseOptions2(opts) {
 module.exports = function(str, opts) {
   var options = normalizeParseOptions(opts);
   if (str === "" || str === null || typeof str === "undefined") {
-    return options.plainObjects ? Object.create(null) : {};
+    return options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
   }
   var tempObj = typeof str === "string" ? parseValues(str, options) : str;
-  var obj = options.plainObjects ? Object.create(null) : {};
+  var obj = options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
   var keys = Object.keys(tempObj);
   for (var i = 0; i < keys.length; ++i) {
     var key = keys[i];
@@ -1290,6 +1323,7 @@ var arrayPrefixGenerators = {
   }
 };
 var isArray = Array.isArray;
+var split = String.prototype.split;
 var push = Array.prototype.push;
 var pushToArray = function(arr, valueOrArray) {
   push.apply(arr, isArray(valueOrArray) ? valueOrArray : [valueOrArray]);
@@ -1317,10 +1351,25 @@ var defaults = {
 var isNonNullishPrimitive = function isNonNullishPrimitive2(v) {
   return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
 };
+var sentinel = {};
 var stringify = function stringify2(object, prefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots, serializeDate2, format, formatter, encodeValuesOnly, charset, sideChannel) {
   var obj = object;
-  if (sideChannel.has(object)) {
-    throw new RangeError("Cyclic object value");
+  var tmpSc = sideChannel;
+  var step = 0;
+  var findFlag = false;
+  while ((tmpSc = tmpSc.get(sentinel)) !== void 0 && !findFlag) {
+    var pos = tmpSc.get(object);
+    step += 1;
+    if (typeof pos !== "undefined") {
+      if (pos === step) {
+        throw new RangeError("Cyclic object value");
+      } else {
+        findFlag = true;
+      }
+    }
+    if (typeof tmpSc.get(sentinel) === "undefined") {
+      step = 0;
+    }
   }
   if (typeof filter === "function") {
     obj = filter(prefix, obj);
@@ -1343,6 +1392,14 @@ var stringify = function stringify2(object, prefix, generateArrayPrefix, strictN
   if (isNonNullishPrimitive(obj) || utils.isBuffer(obj)) {
     if (encoder) {
       var keyValue = encodeValuesOnly ? prefix : encoder(prefix, defaults.encoder, charset, "key", format);
+      if (generateArrayPrefix === "comma" && encodeValuesOnly) {
+        var valuesArray = split.call(String(obj), ",");
+        var valuesJoined = "";
+        for (var i = 0; i < valuesArray.length; ++i) {
+          valuesJoined += (i === 0 ? "" : ",") + formatter(encoder(valuesArray[i], defaults.encoder, charset, "value", format));
+        }
+        return [formatter(keyValue) + "=" + valuesJoined];
+      }
       return [formatter(keyValue) + "=" + formatter(encoder(obj, defaults.encoder, charset, "value", format))];
     }
     return [formatter(prefix) + "=" + formatter(String(obj))];
@@ -1360,15 +1417,16 @@ var stringify = function stringify2(object, prefix, generateArrayPrefix, strictN
     var keys = Object.keys(obj);
     objKeys = sort ? keys.sort(sort) : keys;
   }
-  for (var i = 0; i < objKeys.length; ++i) {
-    var key = objKeys[i];
-    var value = typeof key === "object" && key.value !== void 0 ? key.value : obj[key];
+  for (var j = 0; j < objKeys.length; ++j) {
+    var key = objKeys[j];
+    var value = typeof key === "object" && typeof key.value !== "undefined" ? key.value : obj[key];
     if (skipNulls && value === null) {
       continue;
     }
     var keyPrefix = isArray(obj) ? typeof generateArrayPrefix === "function" ? generateArrayPrefix(prefix, key) : prefix : prefix + (allowDots ? "." + key : "[" + key + "]");
-    sideChannel.set(object, true);
+    sideChannel.set(object, step);
     var valueSideChannel = getSideChannel();
+    valueSideChannel.set(sentinel, sideChannel);
     pushToArray(values, stringify2(value, keyPrefix, generateArrayPrefix, strictNullHandling, skipNulls, encoder, filter, sort, allowDots, serializeDate2, format, formatter, encodeValuesOnly, charset, valueSideChannel));
   }
   return values;
@@ -1377,7 +1435,7 @@ var normalizeStringifyOptions = function normalizeStringifyOptions2(opts) {
   if (!opts) {
     return defaults;
   }
-  if (opts.encoder !== null && opts.encoder !== void 0 && typeof opts.encoder !== "function") {
+  if (opts.encoder !== null && typeof opts.encoder !== "undefined" && typeof opts.encoder !== "function") {
     throw new TypeError("Encoder has to be a function.");
   }
   var charset = opts.charset || defaults.charset;
@@ -1502,7 +1560,7 @@ var compactQueue = function compactQueue2(queue) {
   }
 };
 var arrayToObject = function arrayToObject2(source, options) {
-  var obj = options && options.plainObjects ? Object.create(null) : {};
+  var obj = options && options.plainObjects ? /* @__PURE__ */ Object.create(null) : {};
   for (var i = 0; i < source.length; ++i) {
     if (typeof source[i] !== "undefined") {
       obj[i] = source[i];
@@ -1856,7 +1914,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../store */ "./src/store/index.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils */ "./utils/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "./src/utils/index.js");
 /* harmony import */ var _platform__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../platform */ "./src/platform/index.wx.js");
 /* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! qs */ "./node_modules/qs/lib/index.js");
 /* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(qs__WEBPACK_IMPORTED_MODULE_3__);
@@ -1893,7 +1951,6 @@ class Reporter {
     const config = _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config");
     if (!data.eventId) {
       data.eventId = type;
-      data.dateTime = Date.now();
     }
     (0,_utils__WEBPACK_IMPORTED_MODULE_1__.getCommonParam)((commonParam) => {
       data.t = "metric";
@@ -1909,18 +1966,13 @@ class Reporter {
         delete data.libMethod;
       }
       const result = __spreadValues(__spreadProps(__spreadValues(__spreadValues({}, commonParam.sys), data), {
-        environment: config.environment,
-        appName: config.appName
+        environment: config.environment
       }), config.customParams);
       (0,_utils__WEBPACK_IMPORTED_MODULE_1__.logger)(type, __spreadProps(__spreadValues({}, data), {
-        \u516C\u53C2: __spreadProps(__spreadValues({}, commonParam.sys), {
-          environment: config.environment,
-          pageURL: data.pageURL,
-          appName: config.appName
-        }),
+        \u516C\u53C2: __spreadProps(__spreadValues({}, commonParam.sys), { environment: config.environment, pageURL: data.pageURL }),
         \u81EA\u5B9A\u4E49\u53C2\u6570: config.customParams
       }));
-      this.queue.push(qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(result));
+      this.queue.push((0,qs__WEBPACK_IMPORTED_MODULE_3__.stringify)(result));
       if (!this.timerId) {
         this.timerId = setTimeout(() => {
           this._flush();
@@ -1939,7 +1991,7 @@ class Reporter {
       const data = this.queue[0];
       _platform__WEBPACK_IMPORTED_MODULE_2__["default"].request({
         url: config.collectorUrl,
-        timeout: config.timeout,
+        timeout: config.request_timeout,
         method: "POST",
         header: { "content-type": "application/x-www-form-urlencoded" },
         data: __spreadProps(__spreadValues({}, commonMsg), {
@@ -1958,7 +2010,9 @@ class Reporter {
           }
         },
         complete: () => {
-          this._flush();
+          setTimeout(() => {
+            this._flush();
+          }, _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config").delay);
         }
       });
     } else {
@@ -2018,38 +2072,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _defaultConfig__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./defaultConfig */ "./src/store/defaultConfig.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils */ "./utils/index.js");
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils */ "./src/utils/index.js");
 
 
-function readConfigFile() {
-  return __async(this, null, function* () {
-    try {
-      const text = yield fetch(url).then((response) => response.text());
-      console.log("\u3010 text \u3011==>", text);
-    } catch (e) {
-    }
-  });
-}
 class Store {
   constructor() {
     this.store = {
@@ -2057,7 +2082,6 @@ class Store {
       first_app_show: true,
       is_launched: false
     };
-    readConfigFile();
   }
   set(key, value) {
     if (key === "config") {
@@ -2102,7 +2126,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "addToFavorites": () => (/* binding */ addToFavorites),
 /* harmony export */   "pageClickEvent": () => (/* binding */ pageClickEvent)
 /* harmony export */ });
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils */ "./utils/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ "./src/utils/index.js");
 /* harmony import */ var _reporter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../reporter */ "./src/reporter/index.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store */ "./src/store/index.js");
 var __defProp = Object.defineProperty;
@@ -2138,7 +2162,7 @@ const appLaunch = (oldOnLunch) => _proxyHooks(oldOnLunch, function() {
     eventId: "AppStart",
     pageURL: this.route,
     scene,
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppStart");
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("is_launched", true);
@@ -2151,7 +2175,7 @@ const appShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
     eventId: "AppShow",
     scene,
     pageURL: this.route,
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   }, _store__WEBPACK_IMPORTED_MODULE_2__["default"].get("commonParam"));
   if (!is_first_app_show && is_not_launch) {
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppShow");
@@ -2162,7 +2186,7 @@ const appHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
   const data = {
     eventId: "AppHide",
     pageURL: this.route,
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$AppHide");
 });
@@ -2172,7 +2196,7 @@ const appError = (oldOnError) => _proxyHooks(oldOnError, function(err) {
     erType: err.type || 1,
     pageURL: this.route,
     erMsg: err,
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Error");
 });
@@ -2180,14 +2204,13 @@ const pageShow = (oldOnShow) => _proxyHooks(oldOnShow, function() {
   const time = Date.now();
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", time);
   const { scene, query } = (0,_utils__WEBPACK_IMPORTED_MODULE_0__.getLaunchOptionsSync)();
-  console.log("\u3010 parseQuery(query) \u3011==>", parseQuery(query));
   const data = __spreadProps(__spreadValues({
     eventId: "Pageview",
     pageURL: this.route,
     launchOptionsSync: scene,
     query: parseQuery(query)
   }, lastPageInfo), {
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   });
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageView");
   lastPageInfo = {
@@ -2198,10 +2221,10 @@ const pageHide = (oldOnHide) => _proxyHooks(oldOnHide, function() {
   const pageStayTime = _getPageStayTime();
   const data = {
     eventId: "PageLeave",
-    unloadTime: Date.now(),
+    unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
     pageURL: this.route,
     offDuration: pageStayTime,
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageLeave");
@@ -2210,10 +2233,10 @@ const pageUnLoad = (oldOnUnLoad) => _proxyHooks(oldOnUnLoad, function() {
   const pageStayTime = _getPageStayTime();
   const data = {
     eventId: "PageLeave",
-    unloadTime: Date.now(),
+    unloadTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
     pageURL: this.route,
     offDuration: pageStayTime,
-    dateTime: Date.now()
+    dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
   };
   _store__WEBPACK_IMPORTED_MODULE_2__["default"].set("pageShowTime", -1);
   _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$PageLeave");
@@ -2228,7 +2251,7 @@ const pageShare = function(oldShare) {
       pageURL: this.route,
       sharePath: this.route,
       shareDepth: scene === 1001 ? 0 : 1,
-      dateTime: Date.now(),
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
       shareMethod: "\u8F6C\u53D1\u6D88\u606F\u5361\u7247"
     };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
@@ -2245,7 +2268,7 @@ const shareTimeLine = function(oldShare) {
       pageURL: this.route,
       sharePath: this.route,
       shareDepth: scene === 1001 ? 0 : 1,
-      dateTime: Date.now(),
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
       shareMethod: "\u670B\u53CB\u5708\u5206\u4EAB"
     }, result);
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Share");
@@ -2256,7 +2279,7 @@ const addToFavorites = function() {
     const data = {
       eventId: "Collect",
       pageURL: this.route,
-      dateTime: Date.now()
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now())
     };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Collect");
   };
@@ -2267,7 +2290,7 @@ const pageClickEvent = (oldEvent) => _proxyHooks(oldEvent, function(e) {
       eventId: "Click",
       pageURL: this.route,
       elementId: e.currentTarget.id,
-      dateTime: Date.now(),
+      dateTime: (0,_utils__WEBPACK_IMPORTED_MODULE_0__.formatTimestamp)(Date.now()),
       elementLocation: `${e.detail && e.detail.x},${e.detail && e.detail.y}`
     };
     _reporter__WEBPACK_IMPORTED_MODULE_1__["default"].track(data, "$Click");
@@ -2317,7 +2340,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _hooks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./hooks */ "./src/tracker/hooks.js");
 /* harmony import */ var _reporter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../reporter */ "./src/reporter/index.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store */ "./src/store/index.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils */ "./utils/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/utils/index.js");
 
 
 
@@ -2414,10 +2437,10 @@ class Tracker {
 
 /***/ }),
 
-/***/ "./utils/index.js":
-/*!************************!*\
-  !*** ./utils/index.js ***!
-  \************************/
+/***/ "./src/utils/index.js":
+/*!****************************!*\
+  !*** ./src/utils/index.js ***!
+  \****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2434,10 +2457,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "configMerge": () => (/* binding */ configMerge),
 /* harmony export */   "formatTimestamp": () => (/* binding */ formatTimestamp)
 /* harmony export */ });
-/* harmony import */ var _info__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./info */ "./utils/info.js");
-/* harmony import */ var _storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./storage */ "./utils/storage.js");
-/* harmony import */ var _pageTitle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pageTitle */ "./utils/pageTitle.js");
-/* harmony import */ var _logger__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./logger */ "./utils/logger.js");
+/* harmony import */ var _info__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./info */ "./src/utils/info.js");
+/* harmony import */ var _storage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./storage */ "./src/utils/storage.js");
+/* harmony import */ var _pageTitle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pageTitle */ "./src/utils/pageTitle.js");
+/* harmony import */ var _logger__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./logger */ "./src/utils/logger.js");
 
 
 
@@ -2470,10 +2493,10 @@ function formatTimestamp(timestamp) {
 
 /***/ }),
 
-/***/ "./utils/info.js":
-/*!***********************!*\
-  !*** ./utils/info.js ***!
-  \***********************/
+/***/ "./src/utils/info.js":
+/*!***************************!*\
+  !*** ./src/utils/info.js ***!
+  \***************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2485,52 +2508,32 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "getNetworkType": () => (/* binding */ getNetworkType),
 /* harmony export */   "getCommonParam": () => (/* binding */ getCommonParam)
 /* harmony export */ });
-/* harmony import */ var _src_platform__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/platform */ "./src/platform/index.wx.js");
-/* harmony import */ var _src_store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../src/store */ "./src/store/index.js");
-/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../package.json */ "./package.json");
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
+/* harmony import */ var _platform__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform */ "./src/platform/index.wx.js");
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../store */ "./src/store/index.js");
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../package.json */ "./package.json");
 
 
 
 const libVersion = _package_json__WEBPACK_IMPORTED_MODULE_2__.version;
-const getUserInfo = (cb) => _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].getUserInfo({
+const getUserInfo = (cb) => _platform__WEBPACK_IMPORTED_MODULE_0__["default"].getUserInfo({
   success(res) {
-    _src_store__WEBPACK_IMPORTED_MODULE_1__["default"].set("userInfo", res);
+    _store__WEBPACK_IMPORTED_MODULE_1__["default"].set("userInfo", res);
     cb && cb(res);
   }
 });
 const getUUID = function() {
   return "" + Date.now() + "_" + Math.floor(1e7 * Math.random()) + "_" + Math.random().toString(16).replace(".", "") + "_" + String(Math.random() * 31242).replace(".", "").slice(0, 8);
 };
-const getLaunchOptionsSync = () => _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].getLaunchOptionsSync();
-const getNetworkType = (cb) => __async(undefined, null, function* () {
-  const res = yield _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].getNetworkType();
+const getLaunchOptionsSync = () => _platform__WEBPACK_IMPORTED_MODULE_0__["default"].getLaunchOptionsSync();
+const getNetworkType = async (cb) => {
+  const res = await _platform__WEBPACK_IMPORTED_MODULE_0__["default"].getNetworkType();
   if (res) {
     cb && cb(res.networkType.toUpperCase());
   }
-});
+};
 function getCommonParam(callback) {
   let common_params;
-  getNetworkType((access) => _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].getSystemInfo({
+  getNetworkType((access) => _platform__WEBPACK_IMPORTED_MODULE_0__["default"].getSystemInfo({
     success(res) {
       const system = res.system.split(" ");
       if (res) {
@@ -2563,10 +2566,10 @@ function getCommonParam(callback) {
 
 /***/ }),
 
-/***/ "./utils/logger.js":
-/*!*************************!*\
-  !*** ./utils/logger.js ***!
-  \*************************/
+/***/ "./src/utils/logger.js":
+/*!*****************************!*\
+  !*** ./src/utils/logger.js ***!
+  \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2574,10 +2577,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "logger": () => (/* binding */ logger)
 /* harmony export */ });
-/* harmony import */ var _src_store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/store */ "./src/store/index.js");
+/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../store */ "./src/store/index.js");
 
 const logger = function(type, msg) {
-  const isDebug = _src_store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config").debug;
+  const isDebug = _store__WEBPACK_IMPORTED_MODULE_0__["default"].get("config").debug;
   if (isDebug) {
     console.log(`${type}:`, msg);
   }
@@ -2586,10 +2589,10 @@ const logger = function(type, msg) {
 
 /***/ }),
 
-/***/ "./utils/pageTitle.js":
-/*!****************************!*\
-  !*** ./utils/pageTitle.js ***!
-  \****************************/
+/***/ "./src/utils/pageTitle.js":
+/*!********************************!*\
+  !*** ./src/utils/pageTitle.js ***!
+  \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2615,10 +2618,10 @@ function getPageTitle(route) {
 
 /***/ }),
 
-/***/ "./utils/storage.js":
-/*!**************************!*\
-  !*** ./utils/storage.js ***!
-  \**************************/
+/***/ "./src/utils/storage.js":
+/*!******************************!*\
+  !*** ./src/utils/storage.js ***!
+  \******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2626,21 +2629,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "storage": () => (/* binding */ storage)
 /* harmony export */ });
-/* harmony import */ var _src_platform__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/platform */ "./src/platform/index.wx.js");
+/* harmony import */ var _platform__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform */ "./src/platform/index.wx.js");
 
 const prefix = "terminus-track-";
 const storage = {
   set: (key, data) => {
     key = prefix + key;
-    _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].storage.set(key, data);
+    _platform__WEBPACK_IMPORTED_MODULE_0__["default"].storage.set(key, data);
   },
   get: (key) => {
     key = prefix + key;
-    return _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].storage.get(key);
+    return _platform__WEBPACK_IMPORTED_MODULE_0__["default"].storage.get(key);
   },
   remove: (key) => {
     key = prefix + key;
-    _src_platform__WEBPACK_IMPORTED_MODULE_0__["default"].storage.remove(key);
+    _platform__WEBPACK_IMPORTED_MODULE_0__["default"].storage.remove(key);
   }
 };
 
@@ -2664,7 +2667,7 @@ const storage = {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"tracker","version":"1.0.0","description":"","main":"dist/index.js","scripts":{"dev:wx":"cross-env PLATFORM=wx NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:alipay":"cross-env PLATFORM=alipay NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bd":"cross-env PLATFORM=bd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:dd":"cross-env PLATFORM=dd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bytedance":"cross-env PLATFORM=bytedance NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:jd":"cross-env PLATFORM=jd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","build":"sh ./build/build.sh ","build:wx":"cross-env PLATFORM=wx webpack --config build/webpack.prod.js --mode production","build:alipay":"cross-env PLATFORM=alipay webpack --config build/webpack.prod.js --mode production ","build:dd":"cross-env PLATFORM=dd webpack --config build/webpack.prod.js --mode production ","build:bytedance":"cross-env PLATFORM=bytedance webpack --config build/webpack.prod.js --mode production ","build:jd":"cross-env PLATFORM=jd webpack --config build/webpack.prod.js --mode production "},"author":"liuqh","license":"ISC","devDependencies":{"@typescript-eslint/eslint-plugin":"^4.31.1","@typescript-eslint/parser":"^4.31.1","clean-webpack-plugin":"^4.0.0","copy-webpack-plugin":"^9.0.1","cross-env":"^7.0.3","eslint":"^7.32.0","eslint-config-prettier":"^8.3.0","eslint-plugin-prettier":"^4.0.0","ts-loader":"^9.2.5","typescript":"^4.4.3","webpack":"^5.53.0","webpack-cli":"^4.8.0"},"dependencies":{"babel-loader":"^8.2.2","esbuild-loader":"^2.15.1","fs-jetpack":"^4.3.1","qs":"^6.10.1","stream-browserify":"^3.0.0"}}');
+module.exports = JSON.parse('{"name":"tracker","version":"1.0.0","description":"","main":"dist/index.js","scripts":{"dev:wx":"cross-env PLATFORM=wx NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:alipay":"cross-env PLATFORM=alipay NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bd":"cross-env PLATFORM=bd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:dd":"cross-env PLATFORM=dd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:bytedance":"cross-env PLATFORM=bytedance NODE_ENV=development  webpack --config build/webpack.dev.js --watch","dev:jd":"cross-env PLATFORM=jd NODE_ENV=development  webpack --config build/webpack.dev.js --watch","build":"sh ./build/build.sh ","build:wx":"cross-env PLATFORM=wx webpack --config build/webpack.prod.js --mode production","build:alipay":"cross-env PLATFORM=alipay webpack --config build/webpack.prod.js --mode production ","build:dd":"cross-env PLATFORM=dd webpack --config build/webpack.prod.js --mode production ","build:bytedance":"cross-env PLATFORM=bytedance webpack --config build/webpack.prod.js --mode production ","build:jd":"cross-env PLATFORM=jd webpack --config build/webpack.prod.js --mode production "},"author":"liuqh","license":"ISC","devDependencies":{"clean-webpack-plugin":"^4.0.0","copy-webpack-plugin":"^9.0.1","cross-env":"^7.0.3","esbuild-loader":"^2.15.1","eslint":"^7.32.0","eslint-config-prettier":"^8.3.0","eslint-plugin-prettier":"^4.0.0","webpack":"^5.53.0","webpack-cli":"^4.8.0"},"dependencies":{"qs":"^6.10.1"}}');
 
 /***/ })
 

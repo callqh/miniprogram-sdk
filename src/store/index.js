@@ -1,5 +1,5 @@
 import { defaultConfig } from './defaultConfig';
-import { configMerge } from '../../utils';
+import { configMerge } from '../utils';
 /**
  * 全局数据存放仓库
  * 现存数据段：

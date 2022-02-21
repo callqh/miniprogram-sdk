@@ -1,5 +1,4 @@
 const path = require('path');
-
 // 打包平台
 const platform = process.env.PLATFORM;
 // 运行环境
@@ -7,7 +6,7 @@ const env = process.env.NODE_ENV;
 
 module.exports = {
 	mode: env,
-	entry: './src/index.js',
+	entry: '/src/index.js',
 	devtool: env === 'development' ? 'cheap-source-map' : undefined,
 	output: {
 		library: 'tracker',
@@ -24,7 +23,7 @@ module.exports = {
 				test: /\.js$/,
 				loader: 'esbuild-loader',
 				options: {
-					target: 'es2015', // Syntax to compile to (see options below for possible values)
+					target: 'node12',
 				},
 			},
 		],

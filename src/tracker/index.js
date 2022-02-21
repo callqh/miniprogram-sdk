@@ -13,7 +13,7 @@ import {
 } from './hooks';
 import reporter from '../reporter';
 import store from '../store';
-import { getUUID, storage } from '../../utils';
+import { getUUID, storage } from '../utils';
 // page的原始声明周期集合
 const PAGE_LIFE_METHOD = [
 	'onLoad',

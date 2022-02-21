@@ -3,8 +3,8 @@
  */
 export const defaultConfig = {
 	// 后端地址
-	url: '',
-	ak: '',
+	collectorUrl: '',
+	appKey: '',
 	autoTrack: {
 		appLaunch: true,
 		appShow: true,

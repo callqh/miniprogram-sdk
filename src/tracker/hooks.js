@@ -1,5 +1,4 @@
-import { formatTimestamp, getLaunchOptionsSync } from '../../utils';
-// getPageTitle,
+import { formatTimestamp, getLaunchOptionsSync } from '../utils';
 import $ta from '../reporter';
 import store from '../store';
 // 上个页面的信息
@@ -77,7 +76,6 @@ export const pageShow = oldOnShow =>
 		const time = Date.now();
 		store.set('pageShowTime', time);
 		const { scene, query } = getLaunchOptionsSync();
-		console.log('【 parseQuery(query) 】==>', parseQuery(query));
 
 		const data = {
 			eventId: 'Pageview',
